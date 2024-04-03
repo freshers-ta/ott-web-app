@@ -11,6 +11,7 @@ const config: KnipConfig = {
       ignoreDependencies: [
         // Workspace packages
         'eslint-config-jwp',
+        'i18next-parser',
       ],
       ignoreBinaries: [
         // false positives from yarn scripts in github actions

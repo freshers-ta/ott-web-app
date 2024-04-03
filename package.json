@@ -21,7 +21,7 @@
     "format:eslint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\" --fix",
     "format:prettier": "prettier --write \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "format:stylelint": "stylelint --fix '**/*.{css,scss}'",
-    "i18next": "i18next 'platforms/*/src/**/*.{ts,tsx}' 'packages/*/src/**/*.{ts,tsx}' && node ./scripts/i18next/generate.js",
+    "i18next": "npx ts-node ./scripts/i18next/generate",
     "i18next-diff": "npx ts-node ./scripts/i18next/diff-translations",
     "i18next-update": "npx ts-node ./scripts/i18next/update-translations.ts && yarn i18next",
     "lint": "run-p -c lint:*",

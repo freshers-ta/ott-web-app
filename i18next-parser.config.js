@@ -1,8 +1,9 @@
 const fs = require('fs');
 
-// @TODO: make it work with all packages and the web platform
-const localesEntries = fs.readdirSync('./platforms/web/public/locales');
-const locales = localesEntries.filter((entry) => entry !== '..' && entry !== '.');
+// eslint-disable-next-line no-undef
+const platform = process.env.PLATFORM || 'web';
+const localesEntries = fs.readdirSync(`./platforms/${platform}/public/locales`, { withFileTypes: true });
+const locales = localesEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 
 module.exports = {
   contextSeparator: '_',
@@ -23,6 +24,6 @@ module.exports = {
   lineEnding: 'auto',
   locales,
   namespaceSeparator: ':',
-  output: 'platforms/web/public/locales/$LOCALE/$NAMESPACE.json',
+  output: `platforms/${platform}/public/locales/$LOCALE/$NAMESPACE.json`,
   sort: true,
 };
