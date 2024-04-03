@@ -1,8 +1,11 @@
 const fs = require('fs');
 
 // eslint-disable-next-line no-undef
-const platform = process.env.PLATFORM || 'web';
-const localesEntries = fs.readdirSync(`./platforms/${platform}/public/locales`, { withFileTypes: true });
+const localesPath = process.env.LOCALES_PATH;
+// eslint-disable-next-line no-undef
+const output = process.env.OUTPUT_PATH;
+
+const localesEntries = fs.readdirSync(localesPath, { withFileTypes: true });
 const locales = localesEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 
 module.exports = {
@@ -24,6 +27,6 @@ module.exports = {
   lineEnding: 'auto',
   locales,
   namespaceSeparator: ':',
-  output: `platforms/${platform}/public/locales/$LOCALE/$NAMESPACE.json`,
+  output,
   sort: true,
 };
