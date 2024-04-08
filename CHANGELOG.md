@@ -1,3 +1,18 @@
+## [6.1.0](https://github.com/jwplayer/ott-web-app/compare/v6.0.0...v6.1.0) (2024-04-05)
+
+
+### Features
+
+* **project:** reload site on update ([d4c851b](https://github.com/jwplayer/ott-web-app/commit/d4c851bdccc155b4953c9948ffdab86c2bfacc5e))
+
+
+### Bug Fixes
+
+* **a11y:** focus lost when submitting a form ([9001a21](https://github.com/jwplayer/ott-web-app/commit/9001a21c9a4b0bd35db6c182e2f46b4480983dc8))
+* **i18n:** add missing translations ([961bcd1](https://github.com/jwplayer/ott-web-app/commit/961bcd140b68c2eb8e128b898c23caa8ddcfd744))
+* **payment:** missing feedback when submitting coupon ([5097e60](https://github.com/jwplayer/ott-web-app/commit/5097e607090bcdf098335dd39a6aa6ef82250ad7))
+* **user:** redirect when no integration is configured ([88ce77c](https://github.com/jwplayer/ott-web-app/commit/88ce77c587883117eb6af4dec40481ddcbfe01b2))
+
 ## [6.0.0](https://github.com/jwplayer/ott-web-app/compare/v5.1.1...v6.0.0) (2024-03-25)
 
 
