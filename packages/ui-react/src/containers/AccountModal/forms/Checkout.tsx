@@ -104,7 +104,12 @@ const Checkout = () => {
   const absoluteCancelUrl = modalURLFromWindowLocation('payment-cancelled');
   const absoluteWaitingUrl = modalURLFromWindowLocation('waiting-for-payment', { offerId: selectedOffer?.offerId });
   const absoluteErrorUrl = modalURLFromWindowLocation('payment-error');
-  const absoluteSuccessUrl = offerType === 'svod' ? absoluteWaitingUrl : modalURLFromWindowLocation(null);
+  const absoluteCloseModalUrl = modalURLFromWindowLocation(null);
+
+  // the waiting for payment modal doesn't work for TVOD offers, so we close the modal instead
+  // @todo add support for different offers in the waiting for payment modal
+  const absoluteReturnUrl = offerType === 'svod' ? absoluteWaitingUrl : absoluteCloseModalUrl;
+  const returnUrl = offerType === 'svod' ? waitingUrl : closeModalUrl;
   const referrer = window.location.href;
 
   const paymentMethod = paymentMethods?.find((method) => method.id === parseInt(paymentMethodId));
@@ -138,26 +143,20 @@ const Checkout = () => {
       {isStripePayment && (
         <PaymentForm
           onPaymentFormSubmit={async (cardPaymentPayload: PaymentFormData) =>
-            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: absoluteWaitingUrl })
+            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: absoluteReturnUrl })
           }
         />
       )}
       {isAdyenPayment && (
         <>
-          <AdyenInitialPayment
-            paymentSuccessUrl={offerType === 'svod' ? waitingUrl : closeModalUrl}
-            setUpdatingOrder={setAdyenUpdating}
-            orderId={order.id}
-            type="card"
-          />
+          <AdyenInitialPayment paymentSuccessUrl={returnUrl} setUpdatingOrder={setAdyenUpdating} orderId={order.id} type="card" />
         </>
       )}
       {isPayPalPayment && (
         <PayPal
           onSubmit={() =>
             submitPaymentPaypal.mutate({
-              successUrl: absoluteSuccessUrl,
-              waitingUrl: absoluteWaitingUrl,
+              successUrl: absoluteReturnUrl,
               cancelUrl: absoluteCancelUrl,
               errorUrl: absoluteErrorUrl,
               couponCode,

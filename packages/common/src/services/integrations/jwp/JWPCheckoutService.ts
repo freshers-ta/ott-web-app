@@ -136,7 +136,7 @@ export default class JWPCheckoutService extends CheckoutService {
   paymentWithPayPal: PaymentWithPayPal = async (payload) => {
     try {
       const response = await InPlayer.Payment.getPayPalParams({
-        origin: payload.waitingUrl,
+        origin: payload.successUrl,
         accessFeeId: payload.order.id,
         paymentMethod: 2,
         voucherCode: payload.couponCode,

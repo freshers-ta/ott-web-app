@@ -52,11 +52,7 @@ const useCheckout = ({ onUpdateOrderSuccess, onSubmitPaymentWithoutDetailsSucces
     },
   });
 
-  const submitPaymentPaypal = useMutation<
-    { redirectUrl: string },
-    Error,
-    { successUrl: string; waitingUrl: string; cancelUrl: string; errorUrl: string; couponCode: string }
-  >({
+  const submitPaymentPaypal = useMutation<{ redirectUrl: string }, Error, { successUrl: string; cancelUrl: string; errorUrl: string; couponCode: string }>({
     mutationKey: ['submitPaymentPaypal'],
     mutationFn: checkoutController.paypalPayment,
     onSuccess: onSubmitPaypalPaymentSuccess,

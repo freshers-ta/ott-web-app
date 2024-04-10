@@ -49,18 +49,10 @@ const UpdatePaymentMethod = ({ onCloseButtonClick }: Props) => {
       setPaymentError(undefined);
 
       const successUrl = modalURLFromWindowLocation('payment-method-success');
-      const waitingUrl = modalURLFromWindowLocation('waiting-for-payment');
       const cancelUrl = modalURLFromWindowLocation('payment-cancelled');
       const errorUrl = modalURLFromWindowLocation('payment-error');
 
-      const response = await checkoutController.updatePayPalPaymentMethod(
-        successUrl,
-        waitingUrl,
-        cancelUrl,
-        errorUrl,
-        paymentMethodId as number,
-        currentPaymentId,
-      );
+      const response = await checkoutController.updatePayPalPaymentMethod(successUrl, cancelUrl, errorUrl, paymentMethodId as number, currentPaymentId);
 
       if (response) {
         window.location.href = response.redirectUrl;

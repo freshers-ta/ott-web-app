@@ -263,7 +263,6 @@ export type PaymentWithPayPalPayload = {
   successUrl: string;
   cancelUrl: string;
   errorUrl: string;
-  waitingUrl: string;
   couponCode?: string;
 };
 

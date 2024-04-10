@@ -205,13 +205,11 @@ export default class CheckoutController {
 
   paypalPayment = async ({
     successUrl,
-    waitingUrl,
     cancelUrl,
     errorUrl,
     couponCode = '',
   }: {
     successUrl: string;
-    waitingUrl: string;
     cancelUrl: string;
     errorUrl: string;
     couponCode: string;
@@ -223,7 +221,6 @@ export default class CheckoutController {
     const response = await this.checkoutService.paymentWithPayPal({
       order: order,
       successUrl,
-      waitingUrl,
       cancelUrl,
       errorUrl,
       couponCode,
@@ -291,21 +288,13 @@ export default class CheckoutController {
     return responseData;
   };
 
-  updatePayPalPaymentMethod = async (
-    successUrl: string,
-    waitingUrl: string,
-    cancelUrl: string,
-    errorUrl: string,
-    paymentMethodId: number,
-    currentPaymentId?: number,
-  ) => {
+  updatePayPalPaymentMethod = async (successUrl: string, cancelUrl: string, errorUrl: string, paymentMethodId: number, currentPaymentId?: number) => {
     assertModuleMethod(this.checkoutService.updatePaymentMethodWithPayPal, 'updatePaymentMethodWithPayPal is not available in checkout service');
     assertModuleMethod(this.checkoutService.deletePaymentMethod, 'deletePaymentMethod is not available in checkout service');
 
     const response = await this.checkoutService.updatePaymentMethodWithPayPal({
       paymentMethodId,
       successUrl,
-      waitingUrl,
       cancelUrl,
       errorUrl,
     });
