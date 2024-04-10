@@ -26,6 +26,7 @@ const Checkout = () => {
 
   const chooseOfferUrl = modalURLFromLocation(location, 'choose-offer');
   const welcomeUrl = modalURLFromLocation(location, 'welcome');
+  const waitingUrl = modalURLFromLocation(location, 'waiting-for-payment');
   const closeModalUrl = modalURLFromLocation(location, null);
 
   const backButtonClickHandler = () => navigate(chooseOfferUrl);
@@ -100,10 +101,10 @@ const Checkout = () => {
     );
   }
 
-  const cancelUrl = modalURLFromWindowLocation('payment-cancelled');
-  const waitingUrl = modalURLFromWindowLocation('waiting-for-payment', { offerId: selectedOffer?.offerId });
-  const errorUrl = modalURLFromWindowLocation('payment-error');
-  const successUrlPaypal = offerType === 'svod' ? waitingUrl : closeModalUrl;
+  const absoluteCancelUrl = modalURLFromWindowLocation('payment-cancelled');
+  const absoluteWaitingUrl = modalURLFromWindowLocation('waiting-for-payment', { offerId: selectedOffer?.offerId });
+  const absoluteErrorUrl = modalURLFromWindowLocation('payment-error');
+  const absoluteSuccessUrl = offerType === 'svod' ? absoluteWaitingUrl : modalURLFromWindowLocation(null);
   const referrer = window.location.href;
 
   const paymentMethod = paymentMethods?.find((method) => method.id === parseInt(paymentMethodId));
@@ -137,14 +138,14 @@ const Checkout = () => {
       {isStripePayment && (
         <PaymentForm
           onPaymentFormSubmit={async (cardPaymentPayload: PaymentFormData) =>
-            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: waitingUrl })
+            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: absoluteWaitingUrl })
           }
         />
       )}
       {isAdyenPayment && (
         <>
           <AdyenInitialPayment
-            paymentSuccessUrl={offerType === 'svod' ? welcomeUrl : closeModalUrl}
+            paymentSuccessUrl={offerType === 'svod' ? waitingUrl : closeModalUrl}
             setUpdatingOrder={setAdyenUpdating}
             orderId={order.id}
             type="card"
@@ -153,7 +154,15 @@ const Checkout = () => {
       )}
       {isPayPalPayment && (
         <PayPal
-          onSubmit={() => submitPaymentPaypal.mutate({ successUrl: successUrlPaypal, waitingUrl, cancelUrl, errorUrl, couponCode })}
+          onSubmit={() =>
+            submitPaymentPaypal.mutate({
+              successUrl: absoluteSuccessUrl,
+              waitingUrl: absoluteWaitingUrl,
+              cancelUrl: absoluteCancelUrl,
+              errorUrl: absoluteErrorUrl,
+              couponCode,
+            })
+          }
           error={submitPaymentPaypal.error?.message || null}
         />
       )}
