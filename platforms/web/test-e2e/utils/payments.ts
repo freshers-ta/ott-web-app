@@ -1,6 +1,6 @@
 import { overrideIPCookieKey } from '../../src/constants';
 
-import constants, { longTimeout } from './constants';
+import constants, { longTimeout, normalTimeout } from './constants';
 
 export async function goToCheckout(I: CodeceptJS.I) {
   await I.openMainMenu();
@@ -31,6 +31,7 @@ export function formatDate(date: Date) {
 
 export async function finishAndCheckSubscription(I: CodeceptJS.I, billingDate: Date, today: Date, yearlyPrice: string, hasInlineOfferSwitch: boolean) {
   I.click('Continue');
+  I.waitForText(`Waiting for payment`, normalTimeout);
   I.waitForText(`Welcome to JW OTT Web App (SVOD)`, longTimeout);
   I.waitForText(`Thank you for subscribing to JW OTT Web App (SVOD). Please enjoy all our content.`);
 

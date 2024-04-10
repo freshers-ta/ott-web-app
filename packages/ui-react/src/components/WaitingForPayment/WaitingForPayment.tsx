@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useCheckAccess from '@jwp/ott-hooks-react/src/useCheckAccess';
 import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
+import useEventCallback from '@jwp/ott-hooks-react/src/useEventCallback';
 
 import Spinner from '../Spinner/Spinner';
 import { useAriaAnnouncer } from '../../containers/AnnouncementProvider/AnnoucementProvider';
@@ -18,20 +19,26 @@ const WaitingForPayment = () => {
   const announce = useAriaAnnouncer();
   const { intervalCheckAccess, errorMessage } = useCheckAccess();
 
-  useEffect(() => {
+  const startIntervalEvent = useEventCallback(() => {
     intervalCheckAccess({
       interval: 3000,
       iterations: 5,
       offerId,
-      callback: (hasAccess) => {
+      callback: (hasAccess, offerId) => {
         if (!hasAccess) return;
+        const isSubscription = offerId?.startsWith('S');
 
         announce(t('checkout.payment_success'), 'success');
-        navigate(modalURLFromLocation(location, 'welcome'));
+
+        navigate(modalURLFromLocation(location, isSubscription ? 'welcome' : null));
       },
     });
-    //eslint-disable-next-line
-  }, []);
+  });
+
+  useEffect(() => {
+    startIntervalEvent();
+  }, [startIntervalEvent]);
+
   return (
     <div className={styles.center}>
       {errorMessage ? (

@@ -46,9 +46,9 @@ export default class JWPCheckoutService extends CheckoutService {
     };
   };
 
-  private formatOffer = (offer: AccessFee): Offer => {
+  private formatOffer = (offer: AccessFee, assetId: string): Offer => {
     const ppvOffers = ['ppv', 'ppv_custom'];
-    const offerId = ppvOffers.includes(offer.access_type.name) ? `C${offer.id}` : `S${offer.id}`;
+    const offerId = ppvOffers.includes(offer.access_type.name) ? `C${assetId}_${offer.id}` : `S${assetId}_${offer.id}`;
 
     return {
       id: offer.id,
@@ -101,7 +101,7 @@ export default class JWPCheckoutService extends CheckoutService {
         try {
           const { data } = await InPlayer.Asset.getAssetAccessFees(parseInt(`${assetId}`));
 
-          return data?.map((offer) => this.formatOffer(offer));
+          return data?.map((offer) => this.formatOffer(offer, String(assetId)));
         } catch {
           throw new Error('Failed to get offers');
         }
@@ -217,7 +217,10 @@ export default class JWPCheckoutService extends CheckoutService {
 
   getEntitlements: GetEntitlements = async ({ offerId }) => {
     try {
-      const response = await InPlayer.Asset.checkAccessForAsset(parseInt(offerId));
+      // the offerId can be `S<assetId>_<pricingOptionId>`
+      const [assetId] = offerId.replace(/^[A-Z]/, '').split('_');
+
+      const response = await InPlayer.Asset.checkAccessForAsset(parseInt(assetId));
       return this.formatEntitlements(response.data.expires_at, true);
     } catch {
       return this.formatEntitlements();

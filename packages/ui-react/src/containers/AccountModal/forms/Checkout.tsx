@@ -26,7 +26,6 @@ const Checkout = () => {
 
   const chooseOfferUrl = modalURLFromLocation(location, 'choose-offer');
   const welcomeUrl = modalURLFromLocation(location, 'welcome');
-  const waitingUrl = modalURLFromLocation(location, 'waiting-for-payment');
   const closeModalUrl = modalURLFromLocation(location, null);
 
   const backButtonClickHandler = () => navigate(chooseOfferUrl);
@@ -42,7 +41,8 @@ const Checkout = () => {
       onSubmitPaypalPaymentSuccess: ({ redirectUrl }) => {
         window.location.href = redirectUrl;
       },
-      onSubmitStripePaymentSuccess: () => navigate(modalURLFromLocation(location, 'waiting-for-payment'), { replace: true }),
+      onSubmitStripePaymentSuccess: () =>
+        navigate(modalURLFromLocation(location, 'waiting-for-payment', { offerId: selectedOffer?.offerId }), { replace: true }),
     });
 
   const {
@@ -101,15 +101,11 @@ const Checkout = () => {
     );
   }
 
+  const waitingUrl = modalURLFromLocation(location, 'waiting-for-payment', { offerId: selectedOffer?.offerId });
+
   const absoluteCancelUrl = modalURLFromWindowLocation('payment-cancelled');
   const absoluteWaitingUrl = modalURLFromWindowLocation('waiting-for-payment', { offerId: selectedOffer?.offerId });
   const absoluteErrorUrl = modalURLFromWindowLocation('payment-error');
-  const absoluteCloseModalUrl = modalURLFromWindowLocation(null);
-
-  // the waiting for payment modal doesn't work for TVOD offers, so we close the modal instead
-  // @todo add support for different offers in the waiting for payment modal
-  const absoluteReturnUrl = offerType === 'svod' ? absoluteWaitingUrl : absoluteCloseModalUrl;
-  const returnUrl = offerType === 'svod' ? waitingUrl : closeModalUrl;
   const referrer = window.location.href;
 
   const paymentMethod = paymentMethods?.find((method) => method.id === parseInt(paymentMethodId));
@@ -143,20 +139,20 @@ const Checkout = () => {
       {isStripePayment && (
         <PaymentForm
           onPaymentFormSubmit={async (cardPaymentPayload: PaymentFormData) =>
-            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: absoluteReturnUrl })
+            await submitPaymentStripe.mutateAsync({ cardPaymentPayload, referrer, returnUrl: absoluteWaitingUrl })
           }
         />
       )}
       {isAdyenPayment && (
         <>
-          <AdyenInitialPayment paymentSuccessUrl={returnUrl} setUpdatingOrder={setAdyenUpdating} orderId={order.id} type="card" />
+          <AdyenInitialPayment paymentSuccessUrl={waitingUrl} setUpdatingOrder={setAdyenUpdating} orderId={order.id} type="card" />
         </>
       )}
       {isPayPalPayment && (
         <PayPal
           onSubmit={() =>
             submitPaymentPaypal.mutate({
-              successUrl: absoluteReturnUrl,
+              successUrl: absoluteWaitingUrl,
               cancelUrl: absoluteCancelUrl,
               errorUrl: absoluteErrorUrl,
               couponCode,

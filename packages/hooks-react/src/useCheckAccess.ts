@@ -8,7 +8,7 @@ type IntervalCheckAccessPayload = {
   interval?: number;
   iterations?: number;
   offerId?: string;
-  callback?: (hasAccess: boolean) => void;
+  callback?: (hasAccess: boolean, offerId: string | undefined) => void;
 };
 
 const useCheckAccess = () => {
@@ -32,11 +32,11 @@ const useCheckAccess = () => {
 
         if (hasAccess) {
           await accountController.reloadSubscriptions({ delay: 2000 }); // Delay needed for backend processing (Cleeng API returns empty subscription, even after accessGranted from entitlements call
-          callback?.(true);
+          callback?.(true, offerId);
         } else if (--iterations === 0) {
           window.clearInterval(intervalRef.current);
           setErrorMessage(t('payment.longer_than_usual'));
-          callback?.(false);
+          callback?.(false, offerId);
         }
       }, interval);
     },
