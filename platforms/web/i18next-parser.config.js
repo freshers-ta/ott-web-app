@@ -1,11 +1,9 @@
-const fs = require('fs');
+const { readdirSync } = require('fs');
+const { join } = require('path');
 
-// eslint-disable-next-line no-undef
-const localesPath = process.env.LOCALES_PATH;
-// eslint-disable-next-line no-undef
-const output = process.env.OUTPUT_PATH;
-
-const localesEntries = fs.readdirSync(localesPath, { withFileTypes: true });
+// i18next runs in the workspace root, so we need to make sure the locales path is correct
+const localesPath = join(__dirname, '/public/locales');
+const localesEntries = readdirSync(localesPath, { withFileTypes: true });
 const locales = localesEntries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
 
 module.exports = {
@@ -27,6 +25,6 @@ module.exports = {
   lineEnding: 'auto',
   locales,
   namespaceSeparator: ':',
-  output,
+  output: join(localesPath, '$LOCALE/$NAMESPACE.json'),
   sort: true,
 };

@@ -2675,6 +2675,11 @@
   dependencies:
     postcss "^8.0.0"
 
+"@types/prettier@^2.7.3":
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-2.7.3.tgz#3e51a17e291d01d17d3fc61422015a933af7a08f"
+  integrity sha512-+68kP9yzs4LMp7VNh8gdzMSPZFL44MLGqiHWvttYJe+6qnuVr4Ek9wSBQoveqY/r+LwjCcU29kNVkidwim+kYA==
+
 "@types/prop-types@*":
   version "15.7.11"
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.11.tgz#2596fb352ee96a1379c657734d4b913a613ad563"
@@ -6220,7 +6225,7 @@ i18next-http-backend@^2.2.0:
   dependencies:
     cross-fetch "4.0.0"
 
-i18next-parser@^8.0.0:
+i18next-parser@^8.13.0:
   version "8.13.0"
   resolved "https://registry.yarnpkg.com/i18next-parser/-/i18next-parser-8.13.0.tgz#3d0774f1659d691b451c105cc1eaf8c444e11740"
   integrity sha512-XU7resoeNcpJazh29OncQQUH6HsgCxk06RqBBDAmLHldafxopfCHY1vElyG/o3EY0Sn7XjelAmPTV0SgddJEww==

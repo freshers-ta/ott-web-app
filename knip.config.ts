@@ -11,7 +11,6 @@ const config: KnipConfig = {
       ignoreDependencies: [
         // Workspace packages
         'eslint-config-jwp',
-        'i18next-parser',
       ],
       ignoreBinaries: [
         // false positives from yarn scripts in github actions
@@ -19,6 +18,7 @@ const config: KnipConfig = {
         'global',
         'start:test',
         'codecept:*',
+        'i18next',
       ],
     },
     'packages/common': {
@@ -39,6 +39,7 @@ const config: KnipConfig = {
         '@types/luxon', // Used in tests
         'babel-plugin-transform-typescript-metadata', // Used to build with decorators for ioc resolution
         'eslint-plugin-codeceptjs', // Used by apps/web/test-e2e/.eslintrc.cjs
+        'i18next-parser',
         'luxon', // Used in tests
         'playwright', // Used in test configs
         'sharp', // Requirement for @vite-pwa/assets-generator
