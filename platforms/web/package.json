@@ -15,6 +15,7 @@
     "codecept:mobile": "cd test-e2e && rm -rf \"./output/mobile\" && codeceptjs run-workers --suites ${WORKER_COUNT:=8} --config ./codecept.mobile.cjs",
     "generate-pwa-assets": "pwa-assets-generator",
     "i18next": "npx ts-node ./scripts/i18next/parse-translations.ts",
+    "i18next:sync": "npx ts-node ./scripts/i18next/sync-translations.ts",
     "lint:ts": "tsc --pretty --noEmit -p ./ && tsc --pretty --noEmit -p ./test-e2e",
     "serve-report:desktop": "cd test-e2e && allure serve \"./output/desktop\"",
     "serve-report:mobile": "cd test-e2e && allure serve \"./output/mobile\"",
