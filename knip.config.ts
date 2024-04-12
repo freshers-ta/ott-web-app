@@ -18,7 +18,6 @@ const config: KnipConfig = {
         'global',
         'start:test',
         'codecept:*',
-        'i18next',
       ],
     },
     'packages/common': {

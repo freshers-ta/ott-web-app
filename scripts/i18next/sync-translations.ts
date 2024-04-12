@@ -17,7 +17,7 @@ function flattenObject(obj: Trans, parentKey: string = ''): Record<string, strin
         // Recursively flatten nested objects
         const nestedFlattened = flattenObject(value, newKey);
         result = { ...result, ...nestedFlattened };
-      } else {
+      } else if (typeof value === 'string') {
         // Assign the value to the flattened key
         result[newKey] = value;
       }
@@ -65,14 +65,22 @@ function applyMissingTranslations(translations: Trans, sourceTranslations: Recor
 }
 
 async function getPlatformLocalesPath(platformPath: string) {
-  try {
-    const parserConfig = (await import(join(platformPath, 'i18next-parser.config.js')))?.default;
+  const extensions = ['js', 'cjs', 'mjs', 'ts'];
 
-    if (typeof parserConfig.output === 'string') {
-      return parserConfig.output.replace('/$LOCALE', '').replace('/$NAMESPACE.json', '');
+  try {
+    for (const index in extensions) {
+      const configPath = join(platformPath, `i18next-parser.config.${extensions[index]}`);
+
+      if (!existsSync(configPath)) continue;
+
+      const parserConfig = (await import(configPath))?.default;
+
+      if (typeof parserConfig.output === 'string') {
+        return parserConfig.output.replace('/$LOCALE', '').replace('/$NAMESPACE.json', '');
+      }
     }
-  } catch {
-    console.error('Failed to load i18next-parser.config.js');
+  } catch (error: unknown) {
+    console.error('Failed to load i18next-parser.config.js', error);
   }
 
   return join(platformPath, 'public/locales');
@@ -80,8 +88,8 @@ async function getPlatformLocalesPath(platformPath: string) {
 
 async function fillMissingTranslations(sourcePlatform: string, targetPlatform: string) {
   const translations: Record<string, Record<string, string>> = {};
-  const sourcePlatformPath = join(process.cwd(), '../', sourcePlatform);
-  const targetPlatformPath = join(process.cwd(), '../', targetPlatform);
+  const sourcePlatformPath = join(process.cwd(), 'platforms', sourcePlatform);
+  const targetPlatformPath = join(process.cwd(), 'platforms', targetPlatform);
 
   if (!existsSync(sourcePlatformPath)) {
     console.error(`Source platform doesn't exist ${sourcePlatformPath}`);
