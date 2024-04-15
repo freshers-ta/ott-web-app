@@ -8,7 +8,7 @@ import AccountController from '@jwp/ott-common/src/controllers/AccountController
 import { checkConsentsFromValues, extractConsentValues, formatConsentsFromValues } from '@jwp/ott-common/src/utils/collection';
 import useSocialLoginUrls from '@jwp/ott-hooks-react/src/useSocialLoginUrls';
 import useForm from '@jwp/ott-hooks-react/src/useForm';
-import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
+import { modalURLFromLocation, modalURLFromWindowLocation } from '@jwp/ott-ui-react/src/utils/location';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
 
 import RegistrationForm from '../../../components/RegistrationForm/RegistrationForm';
@@ -55,7 +55,7 @@ const Registration = () => {
     setConsentValues(extractConsentValues(publisherConsents));
   }, [accountController, publisherConsents]);
 
-  const socialLoginURLs = useSocialLoginUrls(window.location.href.split('?')[0]);
+  const socialLoginURLs = useSocialLoginUrls(modalURLFromWindowLocation('personal-details'));
 
   const { handleSubmit, handleChange, handleBlur, values, errors, validationSchemaError, submitting } = useForm<RegistrationFormData>({
     initialValues: { email: '', password: '' },
