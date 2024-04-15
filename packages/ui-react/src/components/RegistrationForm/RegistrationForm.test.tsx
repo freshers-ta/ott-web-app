@@ -19,7 +19,6 @@ describe('<RegistrationForm>', () => {
         consentValues={{}}
         loading={false}
         onConsentChange={vi.fn()}
-        socialLoginURLs={{ facebook: 'https://facebook.com', google: 'https://google.com' }}
       />,
     );
 
