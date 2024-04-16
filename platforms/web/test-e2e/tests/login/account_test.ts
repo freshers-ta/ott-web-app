@@ -7,13 +7,9 @@ import { tryToSubmitForm, fillAndCheckField, checkField } from '#utils/login';
 const fieldRequired = 'This field is required';
 const invalidEmail = 'Please re-enter your email details and try again.';
 const incorrectLogin = 'Incorrect email/password combination';
-const formFeedback = 'div[class*=formFeedback]';
 
-runTestSuite(testConfigs.jwpAuth, 'JW Player');
-runTestSuite(testConfigs.cleengAuthvod, 'Cleeng');
-
-function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
-  Feature(`login - account - ${providerName}`).retry(Number(process.env.TEST_RETRY_COUNT) || 0);
+export function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
+  Feature(`login - account - ${providerName}`).retry(Number(process.env.TEST_RETRY_COUNT || 0));
 
   Before(async ({ I }) => {
     I.useConfig(config);
