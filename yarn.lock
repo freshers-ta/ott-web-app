@@ -6225,10 +6225,10 @@ i18next-http-backend@^2.2.0:
   dependencies:
     cross-fetch "4.0.0"
 
-i18next-parser-workspaces@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/i18next-parser-workspaces/-/i18next-parser-workspaces-0.1.2.tgz#e205c7ba6af882dd35ff0db278fd4fbb5f7318ee"
-  integrity sha512-1zrdjTEl4wbe2PqowbF8J1UX9Q32f+RvdpLztPPpixqOdnRiD+yprBg+B0f8heCHBKpbzycBbmWkarosK2NJFQ==
+i18next-parser-workspaces@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/i18next-parser-workspaces/-/i18next-parser-workspaces-0.2.0.tgz#ada2d11e39d247f5396692e65f18aac5e9f3cdad"
+  integrity sha512-5e1Bhbqflm+FNL0zpvf8Vb1BDJ9aRSKFB7WIjcn1ioVl+W8OmEpSNEQxWBE7mcNR1jCPQnMO48XRNRkZByhTxQ==
   dependencies:
     colors "^1.4.0"
     commander "^12.0.0"
