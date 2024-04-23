@@ -21,14 +21,11 @@ exports[`<Layout /> > renders layout 1`] = `
           <div
             class="_menu_f4f7a7"
           >
-            <div
-              aria-controls="sidebar"
+            <button
               aria-expanded="false"
-              aria-haspopup="true"
               aria-label="open_menu"
               class="_iconButton_0fef65 _iconButton_f4f7a7"
-              role="button"
-              tabindex="0"
+              type="button"
             >
               <svg
                 aria-hidden="true"
@@ -44,20 +41,24 @@ exports[`<Layout /> > renders layout 1`] = `
                   d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
                 />
               </svg>
-            </div>
+            </button>
           </div>
           <nav
             class="_nav_f4f7a7"
           >
-            <a
-              aria-current="page"
-              class="_button_f8f296 _default_f8f296 _text_f8f296 _active_f8f296 _headerButton_c71437"
-              href="/"
-            >
-              <span>
-                home
-              </span>
-            </a>
+            <ul>
+              <li>
+                <a
+                  aria-current="page"
+                  class="_button_f8f296 _default_f8f296 _text_f8f296 _active_f8f296 _navButton_f4f7a7"
+                  href="/"
+                >
+                  <span>
+                    home
+                  </span>
+                </a>
+              </li>
+            </ul>
           </nav>
           <div
             class="_actions_f4f7a7"
@@ -81,11 +82,10 @@ exports[`<Layout /> > renders layout 1`] = `
       <div
         class="_heading_577f70"
       >
-        <div
+        <button
           aria-label="close_menu"
           class="_iconButton_0fef65"
-          role="button"
-          tabindex="0"
+          type="button"
         >
           <svg
             aria-hidden="true"
@@ -101,7 +101,7 @@ exports[`<Layout /> > renders layout 1`] = `
               fill="none"
             />
           </svg>
-        </div>
+        </button>
       </div>
       <nav
         class="_group_577f70"

@@ -52,8 +52,9 @@ export default function AppRoutes() {
   // listen to websocket notifications
   useNotifications();
 
-  if (userData.user && !userData.loading && window.location.href.includes('#token')) {
-    return <Navigate to="/" />; // component instead of hook to prevent extra re-renders
+  if (userData.user && !userData.loading && location.hash.includes('#token')) {
+    // leave the location intact and only remove the token from the hash
+    return <Navigate to={{ ...location, hash: '' }} replace />; // component instead of hook to prevent extra re-renders
   }
 
   if (userData.user && selectingProfileAvatar !== null) {

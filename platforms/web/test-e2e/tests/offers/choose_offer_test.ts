@@ -1,8 +1,8 @@
 import { testConfigs } from '@jwp/ott-testing/constants';
 
 import { LoginContext } from '#utils/password_utils';
-import constants, { longTimeout } from '#utils/constants';
-import { goToCheckout, finishAndCheckSubscription, cancelPlan, renewPlan, overrideIP, addYear } from '#utils/payments';
+import constants from '#utils/constants';
+import { goToCheckout, overrideIP } from '#utils/payments';
 import { ProviderProps } from '#test/types';
 
 const jwProps: ProviderProps = {
@@ -13,11 +13,9 @@ const jwProps: ProviderProps = {
   creditCard: constants.creditCard.inplayer,
   applicableTax: 0,
   canRenewSubscription: false,
-  canOpenReceipts: false,
   fieldWrapper: '',
   hasInlineOfferSwitch: true,
 };
-
 const cleengProps: ProviderProps = {
   config: testConfigs.svod,
   monthlyOffer: constants.offers.monthlyOffer.cleeng,
@@ -26,7 +24,6 @@ const cleengProps: ProviderProps = {
   creditCard: constants.creditCard.cleeng,
   applicableTax: 21,
   canRenewSubscription: true,
-  canOpenReceipts: false, // Cleeng returns an error on Sandbox making this test flaky
   fieldWrapper: 'iframe',
   hasInlineOfferSwitch: false,
 };
@@ -37,19 +34,16 @@ runTestSuite(cleengProps, 'Cleeng');
 function runTestSuite(props: ProviderProps, providerName: string) {
   let paidLoginContext: LoginContext;
 
-  const today = new Date();
-
-  const cardInfo = Array.of(['Card number', '•••• •••• •••• 1111'], ['Expiry date', '03/2030'], ['Security code', '******']);
-
-  Feature(`payments - ${providerName}`).retry(Number(process.env.TEST_RETRY_COUNT) || 0);
+  Feature(`choose offer - ${providerName}`).retry(Number(process.env.TEST_RETRY_COUNT) || 0);
 
   Before(async ({ I }) => {
     // This gets used in checkoutService.getOffer to make sure the offers are geolocated for NL
     overrideIP(I);
+
     I.useConfig(props.config);
   });
 
-  Scenario(`I can see my payments data - ${providerName}`, async ({ I }) => {
+  Scenario(`I can see a payments page with no history - ${providerName}`, async ({ I }) => {
     paidLoginContext = await I.registerOrLogin(paidLoginContext);
 
     await I.openMainMenu();
@@ -146,75 +140,6 @@ function runTestSuite(props: ProviderProps, providerName: string) {
     I.dontSee('Expiry date');
     I.dontSee('Security code');
     I.waitForText('Continue');
-  });
-
-  Scenario(`I can open the PayPal site - ${providerName}`, async ({ I }) => {
-    paidLoginContext = await I.registerOrLogin(paidLoginContext);
-
-    await goToCheckout(I);
-
-    I.click('PayPal');
-    I.click('Continue');
-
-    I.waitInUrl('paypal.com', longTimeout);
-    // I'm sorry, I don't know why, but this test ends in a way that causes the next test to fail
-    I.amOnPage(constants.baseUrl);
-  });
-
-  Scenario(`I can finish my subscription with credit card - ${providerName}`, async ({ I }) => {
-    paidLoginContext = await I.registerOrLogin(paidLoginContext);
-
-    await goToCheckout(I);
-
-    await I.payWithCreditCard(
-      props.paymentFields.creditCardholder,
-      props.creditCard,
-      props.paymentFields.cardNumber,
-      props.paymentFields.expiryDate,
-      props.paymentFields.securityCode,
-      props.fieldWrapper,
-    );
-
-    await finishAndCheckSubscription(I, addYear(today), today, props.yearlyOffer.price, props.hasInlineOfferSwitch);
-
-    cardInfo.forEach(([label, value]) => I.seeInField(label, value));
-  });
-
-  Scenario(`I can cancel my subscription - ${providerName}`, async ({ I }) => {
-    paidLoginContext = await I.registerOrLogin(paidLoginContext);
-
-    cancelPlan(I, addYear(today), props.canRenewSubscription, providerName);
-
-    // Still see payment info
-    cardInfo.forEach(([label, value]) => I.seeInField(label, value));
-  });
-
-  Scenario(`I can renew my subscription - ${providerName}`, async ({ I }) => {
-    if (props.canRenewSubscription) {
-      paidLoginContext = await I.registerOrLogin(paidLoginContext);
-      renewPlan(I, addYear(today), props.yearlyOffer.price);
-    }
-  });
-
-  Scenario(`I can view my invoices - ${providerName}`, async ({ I }) => {
-    if (props.canRenewSubscription) {
-      paidLoginContext = await I.registerOrLogin(paidLoginContext);
-      I.amOnPage(constants.paymentsUrl);
-      I.waitForLoaderDone();
-      I.see('Billing history');
-      I.dontSee('No transactions');
-
-      I.scrollPageToBottom();
-
-      if (props.canOpenReceipts) {
-        // Open the invoice which is opened in a new tab
-        I.click('Show receipt');
-        I.switchToNextTab();
-
-        // Assert invoice functionality by validating the presence of the purchase button
-        I.seeElement('.purchase-button');
-        I.closeCurrentTab();
-      }
-    }
+    I.useConfig(props.config);
   });
 }

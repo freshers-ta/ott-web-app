@@ -25,6 +25,11 @@ import styles from './Header.module.scss';
 
 type TypeHeader = 'static' | 'fixed';
 
+type NavItem = {
+  label: string;
+  to: string;
+};
+
 type Props = {
   headerType?: TypeHeader;
   onMenuButtonClick: () => void;
@@ -51,6 +56,8 @@ type Props = {
   currentLanguage: LanguageDefinition | undefined;
   onLanguageClick: (code: string) => void;
   favoritesEnabled?: boolean;
+  siteName?: string;
+  navItems?: NavItem[];
 
   profilesData?: {
     currentProfile: Profile | null;
@@ -87,7 +94,9 @@ const Header: React.FC<Props> = ({
   currentLanguage,
   onLanguageClick,
   favoritesEnabled,
+  siteName,
   profilesData: { currentProfile, profiles, profilesEnabled, selectProfile, isSelectingProfile } = {},
+  navItems = [],
 }) => {
   const { t } = useTranslation('menu');
   const [logoLoaded, setLogoLoaded] = useState(false);
@@ -195,6 +204,21 @@ const Header: React.FC<Props> = ({
     );
   };
 
+  const renderNav = () => {
+    if (navItems.length === 0) {
+      return children;
+    }
+    return (
+      <ul>
+        {navItems.map((item, index) => (
+          <li key={index}>
+            <Button activeClassname={styles.navButton} label={item.label} to={item.to} variant="text" />
+          </li>
+        ))}
+      </ul>
+    );
+  };
+
   return (
     <header className={headerClassName}>
       <div className={styles.container}>
@@ -202,23 +226,16 @@ const Header: React.FC<Props> = ({
           {t('skip_to_content')}
         </a>
         <div className={styles.menu}>
-          <IconButton
-            className={styles.iconButton}
-            aria-label={sideBarOpen ? t('close_menu') : t('open_menu')}
-            aria-controls="sidebar"
-            aria-haspopup="true"
-            aria-expanded={sideBarOpen}
-            onClick={() => onMenuButtonClick()}
-          >
+          <IconButton className={styles.iconButton} aria-label={t('open_menu')} aria-expanded={sideBarOpen} onClick={() => onMenuButtonClick()}>
             <Icon icon={Menu} />
           </IconButton>
         </div>
         {logoSrc && (
           <div className={styles.brand}>
-            <Logo src={logoSrc} onLoad={() => setLogoLoaded(true)} />
+            <Logo alt={t('logo_alt', { siteName })} src={logoSrc} onLoad={() => setLogoLoaded(true)} />
           </div>
         )}
-        <nav className={styles.nav}>{logoLoaded || !logoSrc ? children : null}</nav>
+        <nav className={styles.nav}>{logoLoaded || !logoSrc ? renderNav() : null}</nav>
         <div className={styles.actions}>
           {renderSearch()}
           {renderLanguageDropdown()}
