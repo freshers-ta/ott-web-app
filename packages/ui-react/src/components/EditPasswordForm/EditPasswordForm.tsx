@@ -4,8 +4,8 @@ import type { EditPasswordFormData } from '@jwp/ott-common/types/account';
 import type { FormErrors } from '@jwp/ott-common/types/form';
 import { testId } from '@jwp/ott-common/src/utils/common';
 
-import PasswordField from '../PasswordField/PasswordField';
-import TextField from '../TextField/TextField';
+import PasswordField from '../form-fields/PasswordField/PasswordField';
+import TextField from '../form-fields/TextField/TextField';
 import Button from '../Button/Button';
 import FormFeedback from '../FormFeedback/FormFeedback';
 import LoadingOverlay from '../LoadingOverlay/LoadingOverlay';
@@ -20,6 +20,7 @@ type Props = {
   error?: string;
   errors: FormErrors<EditPasswordFormData>;
   value: EditPasswordFormData;
+  validationError?: boolean;
   submitting: boolean;
   showOldPasswordField?: boolean;
   showResetTokenField?: boolean;
@@ -36,13 +37,18 @@ const EditPasswordForm: React.FC<Props> = ({
   value,
   errors,
   submitting,
+  validationError,
   email,
   onResendEmailClick,
 }: Props) => {
   const { t } = useTranslation(['account', 'user']);
   return (
-    <form onSubmit={onSubmit} data-testid={testId('forgot-password-form')} noValidate className={styles.forgotPasswordForm}>
-      {errors.form && <FormFeedback variant="error">{errors.form}</FormFeedback>}
+    <form onSubmit={onSubmit} data-testid={testId('forgot-password-form')} noValidate>
+      {errors.form && (
+        <FormFeedback variant="error" visible={!validationError}>
+          {errors.form}
+        </FormFeedback>
+      )}
       <h2 className={styles.title}>{showOldPasswordField && showResetTokenField ? t('user:account.add_password') : t('reset.password_reset')}</h2>
       {showOldPasswordField && showResetTokenField && (
         <p className={styles.paragraph}>
@@ -63,6 +69,7 @@ const EditPasswordForm: React.FC<Props> = ({
           name="oldPassword"
           showToggleView={false}
           showHelperText={false}
+          autoComplete="current-password"
           required
         />
       )}
@@ -76,6 +83,7 @@ const EditPasswordForm: React.FC<Props> = ({
           placeholder={t('reset.reset_password_token')}
           name="resetPasswordToken"
           type="text"
+          autoComplete=""
           required
         />
       )}
@@ -88,6 +96,7 @@ const EditPasswordForm: React.FC<Props> = ({
         placeholder={t('reset.password')}
         error={!!errors.password}
         name="password"
+        autoComplete="new-password"
         required
       />
 
@@ -99,6 +108,8 @@ const EditPasswordForm: React.FC<Props> = ({
         placeholder={t('reset.repeat_new_password')}
         error={!!errors.passwordConfirmation}
         name="passwordConfirmation"
+        autoComplete="new-password"
+        showHelperText={false}
         required
       />
 

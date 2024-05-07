@@ -4,27 +4,29 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { shallow } from '@jwp/ott-common/src/utils/compare';
 import DOMPurify from 'dompurify';
 import { useMutation } from 'react-query';
-import type { Consent } from '@jwp/ott-common/types/account';
+import type { CustomFormField } from '@jwp/ott-common/types/account';
 import { getModule } from '@jwp/ott-common/src/modules/container';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
 import { isTruthy, isTruthyCustomParamValue, logDev, testId } from '@jwp/ott-common/src/utils/common';
 import { formatConsents, formatConsentsFromValues, formatConsentsToRegisterFields, formatConsentValues } from '@jwp/ott-common/src/utils/collection';
 import useToggle from '@jwp/ott-hooks-react/src/useToggle';
 import Visibility from '@jwp/ott-theme/assets/icons/visibility.svg?react';
 import VisibilityOff from '@jwp/ott-theme/assets/icons/visibility_off.svg?react';
+import env from '@jwp/ott-common/src/env';
 
 import type { FormSectionContentArgs, FormSectionProps } from '../Form/FormSection';
 import Alert from '../Alert/Alert';
 import Button from '../Button/Button';
 import Form from '../Form/Form';
 import IconButton from '../IconButton/IconButton';
-import TextField from '../TextField/TextField';
-import Checkbox from '../Checkbox/Checkbox';
-import HelperText from '../HelperText/HelperText';
+import FormFeedback from '../FormFeedback/FormFeedback';
+import TextField from '../form-fields/TextField/TextField';
+import Checkbox from '../form-fields/Checkbox/Checkbox';
 import CustomRegisterField from '../CustomRegisterField/CustomRegisterField';
 import Icon from '../Icon/Icon';
 import { modalURLFromLocation } from '../../utils/location';
+import { useAriaAnnouncer } from '../../containers/AnnouncementProvider/AnnoucementProvider';
 
 import styles from './Account.module.scss';
 
@@ -45,13 +47,15 @@ interface FormErrors {
 const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }: Props): JSX.Element => {
   const accountController = getModule(AccountController);
 
-  const { t } = useTranslation('user');
+  const { t, i18n } = useTranslation('user');
+  const announce = useAriaAnnouncer();
   const navigate = useNavigate();
   const location = useLocation();
   const [viewPassword, toggleViewPassword] = useToggle();
   const exportData = useMutation(accountController.exportAccountData);
   const [isAlertVisible, setIsAlertVisible] = useState(false);
   const exportDataMessage = exportData.isSuccess ? t('account.export_data_success') : t('account.export_data_error');
+  const htmlLang = i18n.language !== env.APP_DEFAULT_LANGUAGE ? env.APP_DEFAULT_LANGUAGE : undefined;
 
   useEffect(() => {
     if (exportData.isSuccess || exportData.isError) {
@@ -74,9 +78,18 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
   const isSocialLogin = (registerSource && registerSource !== 'inplayer') || false;
   const shouldAddPassword = (isSocialLogin && !customer?.metadata?.has_password) || false;
 
+  // load consents (move to `useConsents` hook?)
+  useEffect(() => {
+    if (!publisherConsents) {
+      accountController.getPublisherConsents();
+
+      return;
+    }
+  }, [accountController, publisherConsents]);
+
   const [termsConsents, nonTermsConsents] = useMemo(() => {
-    const terms: Consent[] = [];
-    const nonTerms: Consent[] = [];
+    const terms: CustomFormField[] = [];
+    const nonTerms: CustomFormField[] = [];
 
     publisherConsents?.forEach((consent) => {
       if (!consent?.type || consent?.type === 'checkbox') {
@@ -123,28 +136,38 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
       .forEach((error) => {
         switch (error.trim()) {
           case 'Invalid param email':
+            formErrors.form = t('account.errors.validation_error');
             formErrors.email = t('account.errors.invalid_param_email');
             break;
           case 'Customer email already exists':
+            formErrors.form = t('account.errors.validation_error');
             formErrors.email = t('account.errors.email_exists');
             break;
           case 'Please enter a valid e-mail address.':
+            formErrors.form = t('account.errors.validation_error');
             formErrors.email = t('account.errors.please_enter_valid_email');
             break;
           case 'Invalid confirmationPassword': {
+            formErrors.form = t('account.errors.validation_error');
             formErrors.confirmationPassword = t('account.errors.invalid_password');
             break;
           }
           case 'firstName can have max 50 characters.': {
+            formErrors.form = t('account.errors.validation_error');
             formErrors.firstName = t('account.errors.first_name_too_long');
             break;
           }
           case 'lastName can have max 50 characters.': {
+            formErrors.form = t('account.errors.validation_error');
             formErrors.lastName = t('account.errors.last_name_too_long');
             break;
           }
           case 'Email update not supported': {
             formErrors.form = t('account.errors.email_update_not_supported');
+            break;
+          }
+          case 'Wrong email/password combination': {
+            formErrors.form = t('account.errors.wrong_combination');
             break;
           }
           default: {
@@ -172,8 +195,8 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
         // Render the section content, but also add a warning text if there's a form level error
         return (
           <>
+            {formErrors?.form ? <FormFeedback variant="error">{formErrors.form}</FormFeedback> : null}
             {props.content?.({ ...args, errors: formErrors })}
-            <HelperText error={!!formErrors?.form}>{formErrors?.form}</HelperText>
           </>
         );
       },
@@ -194,15 +217,17 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
 
   return (
     <>
+      <h1 className="hideUntilFocus">{t('nav.account')}</h1>
+
       <Form initialValues={initialValues}>
         {[
           formSection({
             label: t('account.about_you'),
             editButton: t('account.edit_information'),
-            onSubmit: (values) => {
+            onSubmit: async (values) => {
               const consents = formatConsentsFromValues(publisherConsents, { ...values.metadata, ...values.consentsValues });
 
-              return accountController.updateUser({
+              const response = await accountController.updateUser({
                 firstName: values.firstName || '',
                 lastName: values.lastName || '',
                 metadata: {
@@ -211,10 +236,13 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                   consents: JSON.stringify(consents),
                 },
               });
+
+              announce(t('account.update_success', { section: t('account.about_you') }), 'success');
+
+              return response;
             },
             content: (section) => (
               <>
-                <h1 className={styles.hideUntilFocus}>{t('nav.account')}</h1>
                 <TextField
                   name="firstName"
                   label={t('account.firstname')}
@@ -224,6 +252,8 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                   helperText={section.errors?.firstName}
                   disabled={section.isBusy}
                   editing={section.isEditing}
+                  autoComplete="given-name"
+                  lang={htmlLang}
                 />
                 <TextField
                   name="lastName"
@@ -234,18 +264,27 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                   helperText={section.errors?.lastName}
                   disabled={section.isBusy}
                   editing={section.isEditing}
+                  autoComplete="family-name"
+                  lang={htmlLang}
                 />
               </>
             ),
           }),
           formSection({
             label: t('account.email'),
-            onSubmit: (values) =>
-              accountController.updateUser({
+            onSubmit: async (values) => {
+              if (!values.email || !values.confirmationPassword) {
+                throw new Error('Wrong email/password combination');
+              }
+              const response = await accountController.updateUser({
                 email: values.email || '',
                 confirmationPassword: values.confirmationPassword,
-              }),
-            canSave: (values) => !!(values.email && values.confirmationPassword),
+              });
+
+              announce(t('account.update_success', { section: t('account.email') }), 'success');
+
+              return response;
+            },
             editButton: t('account.edit_account'),
             readOnly: !canUpdateEmail,
             content: (section) => (
@@ -259,6 +298,7 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                   helperText={section.errors?.email}
                   disabled={section.isBusy}
                   editing={section.isEditing}
+                  autoComplete="email"
                   required
                 />
                 {section.isEditing && (
@@ -271,8 +311,9 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                     helperText={section.errors?.confirmationPassword}
                     type={viewPassword ? 'text' : 'password'}
                     disabled={section.isBusy}
+                    autoComplete="current-password"
                     rightControl={
-                      <IconButton aria-label={viewPassword ? t('account.hide_password') : t('account.view_password')} onClick={() => toggleViewPassword()}>
+                      <IconButton aria-label={t('account.view_password')} onClick={() => toggleViewPassword()} aria-pressed={viewPassword}>
                         <Icon icon={viewPassword ? Visibility : VisibilityOff} />
                       </IconButton>
                     }
@@ -295,7 +336,13 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
           formSection({
             label: t('account.terms_and_tracking'),
             saveButton: t('account.update_consents'),
-            onSubmit: (values) => accountController.updateConsents(formatConsentsFromValues(publisherConsents, values.consentsValues)),
+            onSubmit: async (values) => {
+              const response = await accountController.updateConsents(formatConsentsFromValues(publisherConsents, values.consentsValues));
+
+              announce(t('account.update_success', { section: t('account.terms_and_tracking') }), 'success');
+
+              return response;
+            },
             content: (section) => (
               <>
                 {termsConsents?.map((consent, index) => (
@@ -304,8 +351,10 @@ const Account = ({ panelClassName, panelHeaderClassName, canUpdateEmail = true }
                     name={`consentsValues.${consent.name}`}
                     checked={isTruthyCustomParamValue(section.values.consentsValues?.[consent.name])}
                     onChange={section.onChange}
-                    label={formatConsentLabel(consent.label)}
+                    checkboxLabel={formatConsentLabel(consent.label)}
                     disabled={consent.required || section.isBusy}
+                    required={consent.required}
+                    lang={htmlLang}
                   />
                 ))}
               </>

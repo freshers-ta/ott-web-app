@@ -5,17 +5,19 @@ import { useTranslation } from 'react-i18next';
 import type { EditPasswordFormData } from '@jwp/ott-common/types/account';
 import { getModule } from '@jwp/ott-common/src/modules/container';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
 import useForm, { type UseFormOnSubmitHandler } from '@jwp/ott-hooks-react/src/useForm';
 import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
 import useQueryParam from '@jwp/ott-ui-react/src/hooks/useQueryParam';
 
 import EditPasswordForm from '../../../components/EditPasswordForm/EditPasswordForm';
+import { useAriaAnnouncer } from '../../AnnouncementProvider/AnnoucementProvider';
 
 const ResetPassword = ({ type }: { type?: 'add' }) => {
   const accountController = getModule(AccountController);
 
   const { t } = useTranslation('account');
+  const announce = useAriaAnnouncer();
   const location = useLocation();
   const navigate = useNavigate();
   const resetPasswordTokenParam = useQueryParam('resetPasswordToken');
@@ -45,6 +47,8 @@ const ResetPassword = ({ type }: { type?: 'add' }) => {
         }
         await accountController.changePasswordWithToken(emailParam || '', password, resetToken, passwordConfirmation);
       }
+
+      announce(t('reset.password_reset_success'), 'success');
       await accountController.logout();
       navigate(modalURLFromLocation(location, 'login'));
     } catch (error: unknown) {
@@ -55,6 +59,8 @@ const ResetPassword = ({ type }: { type?: 'add' }) => {
           setErrors({ form: t('reset.invalid_reset_link') });
         } else if (error.message.includes('score does not match standards')) {
           setErrors({ form: t('reset.password_strength') });
+        } else if (error.message.includes('old password does not match')) {
+          setErrors({ form: t('reset.old_password_does_not_match') });
         } else if (error.message.includes('password could not be set')) {
           setErrors({ form: t('reset.invalid_token') });
         }
@@ -63,19 +69,20 @@ const ResetPassword = ({ type }: { type?: 'add' }) => {
     setSubmitting(false);
   };
 
-  const passwordForm = useForm(
-    { password: '', passwordConfirmation: '' },
-    passwordSubmitHandler,
-    object().shape({
+  const passwordForm = useForm<EditPasswordFormData>({
+    initialValues: { password: '', passwordConfirmation: '' },
+    validationSchema: object().shape({
       email: string(),
       oldPassword: string(),
       password: string()
         .matches(/^(?=.*[a-z])(?=.*[0-9]).{8,}$/, t('registration.invalid_password'))
-        .required(t('login.field_required')),
-      passwordConfirmation: string(),
+        .required(t('login.field_required', { field: t('login.password') })),
+      passwordConfirmation: string().required(),
+      resetPasswordToken: string(),
     }),
-    true,
-  );
+    validateOnBlur: true,
+    onSubmit: passwordSubmitHandler,
+  });
 
   const resendEmailClickHandler = async () => {
     try {
@@ -95,6 +102,7 @@ const ResetPassword = ({ type }: { type?: 'add' }) => {
       onBlur={passwordForm.handleBlur}
       errors={passwordForm.errors}
       onSubmit={passwordForm.handleSubmit}
+      validationError={passwordForm.validationSchemaError}
       showOldPasswordField={!!(user && !resetPasswordTokenParam)}
       showResetTokenField={type === 'add' || (!user && !resetPasswordTokenParam)}
       email={emailParam || email}

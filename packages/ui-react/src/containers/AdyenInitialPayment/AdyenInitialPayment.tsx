@@ -4,25 +4,29 @@ import type DropinElement from '@adyen/adyen-web/dist/types/components/Dropin/Dr
 import { useNavigate } from 'react-router';
 import type { AdyenPaymentSession } from '@jwp/ott-common/types/checkout';
 import { getModule } from '@jwp/ott-common/src/modules/container';
-import CheckoutController from '@jwp/ott-common/src/stores/CheckoutController';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
+import CheckoutController from '@jwp/ott-common/src/controllers/CheckoutController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
 import { createURL } from '@jwp/ott-common/src/utils/urlFormatting';
 import { ADYEN_LIVE_CLIENT_KEY, ADYEN_TEST_CLIENT_KEY } from '@jwp/ott-common/src/constants';
+import { useTranslation } from 'react-i18next';
 
 import Adyen from '../../components/Adyen/Adyen';
+import { useAriaAnnouncer } from '../AnnouncementProvider/AnnoucementProvider';
 
 type Props = {
   setUpdatingOrder: (loading: boolean) => void;
-  setPaymentError: (errorMessage?: string) => void;
   type: AdyenPaymentMethodType;
   paymentSuccessUrl: string;
   orderId?: number;
 };
 
-export default function AdyenInitialPayment({ setUpdatingOrder, type, setPaymentError, paymentSuccessUrl, orderId }: Props) {
+export default function AdyenInitialPayment({ setUpdatingOrder, type, paymentSuccessUrl, orderId }: Props) {
   const accountController = getModule(AccountController);
   const checkoutController = getModule(CheckoutController);
+  const { t } = useTranslation(['account', 'error']);
+  const announce = useAriaAnnouncer();
 
+  const [error, setError] = useState<string>();
   const [session, setSession] = useState<AdyenPaymentSession>();
 
   const isSandbox = accountController.getSandbox();
@@ -38,7 +42,7 @@ export default function AdyenInitialPayment({ setUpdatingOrder, type, setPayment
         setSession(session);
       } catch (error: unknown) {
         if (error instanceof Error) {
-          setPaymentError(error.message);
+          setError(error.message);
         }
       }
 
@@ -46,7 +50,7 @@ export default function AdyenInitialPayment({ setUpdatingOrder, type, setPayment
     };
 
     createSession();
-  }, [setUpdatingOrder, setPaymentError, checkoutController]);
+  }, [setUpdatingOrder, checkoutController]);
 
   const onSubmit = useCallback(
     async (state: AdyenEventData, handleAction: DropinElement['handleAction']) => {
@@ -54,10 +58,10 @@ export default function AdyenInitialPayment({ setUpdatingOrder, type, setPayment
 
       try {
         setUpdatingOrder(true);
-        setPaymentError(undefined);
+        setError(undefined);
 
         if (orderId === undefined) {
-          setPaymentError('Order is unknown');
+          setError(t('error:adyen_order_unknown'));
           return;
         }
 
@@ -71,18 +75,18 @@ export default function AdyenInitialPayment({ setUpdatingOrder, type, setPayment
           handleAction(result.action);
         }
 
-        await accountController.reloadActiveSubscription({ delay: 2000 });
-
+        await accountController.reloadSubscriptions({ delay: 2000 });
+        announce(t('account:checkout.payment_success'), 'success');
         navigate(paymentSuccessUrl, { replace: true });
       } catch (error: unknown) {
         if (error instanceof Error) {
-          setPaymentError(error.message);
+          setError(error.message);
         }
       }
 
       setUpdatingOrder(false);
     },
-    [navigate, orderId, paymentSuccessUrl, setPaymentError, setUpdatingOrder, accountController, checkoutController],
+    [setUpdatingOrder, orderId, checkoutController, accountController, announce, t, navigate, paymentSuccessUrl],
   );
 
   const adyenConfiguration: CoreOptions = useMemo(
@@ -104,19 +108,20 @@ export default function AdyenInitialPayment({ setUpdatingOrder, type, setPayment
           const data = state.data.details as number | undefined;
           await checkoutController.finalizeAdyenPayment(orderId, data);
 
+          announce(t('account:checkout.payment_success'), 'success');
           navigate(paymentSuccessUrl, { replace: true });
         } catch (error: unknown) {
           if (error instanceof Error) {
-            setPaymentError(error.message);
+            setError(error.message);
             setUpdatingOrder(false);
           }
         }
       },
       onSubmit: (state: AdyenEventData, component: DropinElement) => onSubmit(state, component.handleAction),
-      onError: (error: Error) => setPaymentError(error.message),
+      onError: (error: Error) => setError(error.message),
     }),
-    [onSubmit, paymentSuccessUrl, isSandbox, session, orderId, navigate, setPaymentError, setUpdatingOrder, checkoutController],
+    [session, isSandbox, setUpdatingOrder, checkoutController, orderId, announce, t, navigate, paymentSuccessUrl, onSubmit],
   );
 
-  return <Adyen configuration={adyenConfiguration} type={type} />;
+  return <Adyen configuration={adyenConfiguration} type={type} error={error} />;
 }

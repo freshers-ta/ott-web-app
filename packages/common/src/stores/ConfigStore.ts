@@ -21,6 +21,7 @@ export const useConfigStore = createStore<ConfigState>('ConfigStore', () => ({
     siteName: '',
     description: '',
     player: '',
+    siteId: '',
     assets: {},
     content: [],
     menu: [],
@@ -34,9 +35,7 @@ export const useConfigStore = createStore<ConfigState>('ConfigStore', () => ({
         useSandbox: true,
       },
     },
-    styling: {
-      footerText: '',
-    },
+    styling: {},
   },
   settings: {
     additionalAllowedConfigSources: [],

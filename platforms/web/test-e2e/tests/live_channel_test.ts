@@ -36,9 +36,7 @@ Before(async ({ I }) => {
   I.useConfig(testConfigs.basicNoAuth);
 });
 
-const videoDetailsLocator = locate({ css: 'div[data-testid="video-details"]' });
-const shelfContainerLocator = locate({ css: 'div[role="row"]' });
-const shelfLocator = locate({ css: 'div[role="cell"]' }).inside(shelfContainerLocator);
+const videoDetailsLocator = locate({ css: 'header[data-testid="video-details"]' });
 const epgContainerLocator = locate({ css: 'div[data-testid="container"]' });
 
 const makeEpgProgramLocator = (id: string) => locate({ css: `div[data-testid*="${id}"]` }).inside(epgContainerLocator);
@@ -58,7 +56,7 @@ Scenario('I can navigate to live channels from the live channels shelf', async (
   await I.scrollToShelf(ShelfId.liveChannels);
 
   for (let i = 1; i <= liveChannelsCount; i++) {
-    I.see(`Channel ${i}`, shelfLocator);
+    I.see(`Channel ${i}`, { xpath: `//section[@data-testid="shelf-${ShelfId.liveChannels}"]` });
   }
 
   I.see('Live Channels');
@@ -102,7 +100,7 @@ Scenario.skip('I can watch the current live program on the live channel screen',
   // to make sure the back button is visible and can be clicked on
   I.click('video');
 
-  I.click('div[aria-label="Back"]');
+  I.click('button[aria-label="Back"]');
   await I.checkPlayerClosed();
 });
 
@@ -150,7 +148,7 @@ Scenario('I can select an upcoming program on the same channel', async ({ I }) =
   I.dontSee('LIVE', locate('div').inside(videoDetailsLocator));
   I.see('On Channel 1', locate('div').inside(videoDetailsLocator));
 
-  I.seeElement(locate('button[disabled]').withText('Start watching'));
+  I.seeElement(locate('button[aria-disabled]').withText('Start watching'));
 
   I.seeElement(channel1LiveProgramLocator);
   await isLiveProgram(I, channel1LiveProgramLocator, 'channel 1');
@@ -237,22 +235,28 @@ Scenario('I can navigate through the epg', async ({ I }) => {
 
 Scenario('I can see the channel logo for Channel 1', async ({ I }) => {
   await I.openVideoCard('Channel 1');
-  await I.seeEpgChannelLogoImage('Uh7zcqVm', 'https://cdn.jwplayer.com/v2/media/Uh7zcqVm/images/channel_logo.webp?poster_fallback=1&width=320');
+  await I.seeEpgChannelLogoImage('Uh7zcqVm', 'https://cdn.jwplayer.com/v2/media/Uh7zcqVm/images/channel_logo.webp?poster_fallback=1&width=320', 'Channel 1');
 });
 
 Scenario('I can see the channel logo for Channel 2', async ({ I }) => {
   await I.openVideoCard('Channel 2');
-  await I.seeEpgChannelLogoImage('Z2evecey', 'https://cdn.jwplayer.com/v2/media/Z2evecey/images/channel_logo.webp?poster_fallback=1&width=320');
+  await I.seeEpgChannelLogoImage('Z2evecey', 'https://cdn.jwplayer.com/v2/media/Z2evecey/images/channel_logo.webp?poster_fallback=1&width=320', 'Channel 2');
 });
 
 Scenario('I can see the background image for Channel 3', async ({ I }) => {
   await I.openVideoCard('Channel 3');
-  await I.seeVideoDetailsBackgroundImage('Channel 3', 'https://cdn.jwplayer.com/v2/media/wewsVyR7/images/background.webp?poster_fallback=1&width=1280');
+  I.seeAttributesOnElements('header[data-testid="video-details"] img', {
+    alt: '', // Intentionally empty
+    src: 'https://cdn.jwplayer.com/v2/media/wewsVyR7/images/background.webp?poster_fallback=1&width=1280',
+  });
 });
 
 Scenario('I can see the background image for Channel 4', async ({ I }) => {
   await I.openVideoCard('Channel 4');
-  await I.seeVideoDetailsBackgroundImage('Channel 4', 'https://cdn.jwplayer.com/v2/media/kH7LozaK/images/background.webp?poster_fallback=1&width=1280');
+  I.seeAttributesOnElements('header[data-testid="video-details"] img', {
+    alt: '', // Intentionally empty
+    src: 'https://cdn.jwplayer.com/v2/media/kH7LozaK/images/background.webp?poster_fallback=1&width=1280',
+  });
 });
 
 async function isSelectedProgram(I: CodeceptJS.I, locator: CodeceptJS.Locator, channel: string, isLive: boolean) {

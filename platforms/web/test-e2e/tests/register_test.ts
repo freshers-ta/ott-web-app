@@ -66,10 +66,6 @@ function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
     I.dontSeeElement(constants.loginFormSelector);
   });
 
-  Scenario(`The submit button is disabled when the form is incompletely filled in - ${providerName}`, async ({ I }) => {
-    I.seeAttributesOnElements('button[type="submit"]', { disabled: true });
-  });
-
   Scenario(`I get warned when filling in incorrect credentials - ${providerName}`, async ({ I }) => {
     I.fillField('Email', 'test');
     I.pressKey('Tab');
@@ -85,7 +81,7 @@ function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
 
     I.fillField('password', '1234');
     I.pressKey('Tab');
-    checkColor('rgb(255, 12, 62)');
+    checkColor('rgb(255, 53, 53)');
 
     I.fillField('password', 'Test1234');
     checkColor('rgb(255, 255, 255)');
@@ -124,7 +120,7 @@ function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
       return;
     }
 
-    I.seeCssPropertiesOnElements('input[name="terms"]', { 'border-color': '#ff0c3e' });
+    I.seeCssPropertiesOnElements('input[name="terms"]', { 'border-color': '#FF3535' });
   });
 
   Scenario(`I get warned for duplicate users - ${providerName}`, async ({ I }) => {

@@ -27,8 +27,8 @@ const TrailerModal: React.FC<Props> = ({ item, open, title, onClose }) => {
   if (!item) return null;
 
   return (
-    <Modal open={open} onClose={onClose} role="dialog">
-      <div className={styles.container}>
+    <Modal open={open} onClose={onClose}>
+      <div className={styles.container} role="dialog" aria-modal="true" aria-labelledby="trailer-modal-title">
         <Player
           item={item}
           onPlay={handlePlay}
@@ -38,9 +38,11 @@ const TrailerModal: React.FC<Props> = ({ item, open, title, onClose }) => {
           onUserInActive={handleUserInactive}
           autostart
         />
-        <Fade open={!isPlaying || userActive}>
+        <Fade open={!isPlaying || userActive} keepMounted>
           <div className={styles.playerOverlay}>
-            <div className={styles.title}>{title}</div>
+            <h1 id="trailer-modal-title" className={styles.title}>
+              {title}
+            </h1>
           </div>
           <ModalCloseButton onClick={onClose} />
         </Fade>

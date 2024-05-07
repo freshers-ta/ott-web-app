@@ -10,13 +10,13 @@ import styles from './Modal.module.scss';
 
 type Props = {
   children?: React.ReactNode;
-  AnimationComponent?: React.JSXElementConstructor<{ open?: boolean; duration?: number; delay?: number; children: React.ReactNode }>;
+  AnimationComponent?: React.JSXElementConstructor<{ open?: boolean; duration?: number; delay?: number; children: React.ReactNode; className?: string }>;
   open: boolean;
   onClose?: () => void;
-  role?: string;
-};
+  animationContainerClassName?: string;
+} & React.AriaAttributes;
 
-const Modal: React.FC<Props> = ({ open, onClose, children, AnimationComponent = Grow, role }: Props) => {
+const Modal: React.FC<Props> = ({ open, onClose, children, AnimationComponent = Grow, animationContainerClassName, ...ariaAtributes }: Props) => {
   const [visible, setVisible] = useState(open);
   const lastFocus = useRef<HTMLElement>() as React.MutableRefObject<HTMLElement>;
   const modalRef = useRef<HTMLDivElement>() as React.MutableRefObject<HTMLDivElement>;
@@ -44,43 +44,47 @@ const Modal: React.FC<Props> = ({ open, onClose, children, AnimationComponent = 
       // make sure main content is hidden for screen readers and inert
       if (appView) {
         appView.inert = true;
-        appView.setAttribute('aria-hidden', 'true');
       }
 
       // prevent scrolling under the modal
       document.body.style.marginRight = `${scrollbarSize()}px`;
       document.body.style.overflowY = 'hidden';
-
-      // focus the first element in the modal
-      if (modalRef.current) {
-        const interactiveElement = modalRef.current.querySelectorAll('a, button, [tabindex="0"]')[0] as HTMLElement | null;
-
-        if (interactiveElement) interactiveElement.focus();
-      }
     } else {
       if (appView) {
         appView.inert = false;
-        appView.removeAttribute('aria-hidden');
       }
 
       document.body.style.removeProperty('margin-right');
       document.body.style.removeProperty('overflow-y');
+    }
+  }, [open]);
 
+  useEffect(() => {
+    if (visible) {
+      // focus the first element in the modal
+      if (modalRef.current) {
+        const interactiveElement = modalRef.current.querySelectorAll(
+          'div[role="dialog"] input, div[role="dialog"] a, div[role="dialog"] button, div[role="dialog"] [tabindex]',
+        )[0] as HTMLElement | null;
+
+        if (interactiveElement) interactiveElement.focus();
+      }
+    } else {
       // restore last focussed element
       if (lastFocus.current) {
         lastFocus.current.focus();
       }
     }
-  }, [open]);
+  }, [visible]);
 
   if (!open && !visible) return null;
 
   return ReactDOM.createPortal(
     <Fade open={open} duration={300} onCloseAnimationEnd={() => setVisible(false)}>
-      <div className={styles.modal} onKeyDown={keyDownEventHandler} ref={modalRef} role={role}>
+      <div className={styles.modal} onKeyDown={keyDownEventHandler} ref={modalRef}>
         <div className={styles.backdrop} onClick={onClose} data-testid={testId('backdrop')} />
-        <div className={styles.container}>
-          <AnimationComponent open={open} duration={200}>
+        <div className={styles.container} {...ariaAtributes}>
+          <AnimationComponent open={open} duration={200} className={animationContainerClassName}>
             {children}
           </AnimationComponent>
         </div>

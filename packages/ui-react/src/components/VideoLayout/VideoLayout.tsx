@@ -139,12 +139,11 @@ const VideoLayout: React.FC<Props> = ({
     ) : (
       <div className={styles.relatedVideosList}>
         <VideoList
-          className={styles.videoList}
           header={
-            <>
+            <div className={styles.relatedVideosListHeader}>
               {title && <h2 className={styles.relatedVideosListTitle}>{relatedTitle}</h2>}
               {hasFilters && renderFilters(true)}
-            </>
+            </div>
           }
           activeMediaId={item?.mediaid}
           activeLabel={activeLabel}
@@ -166,7 +165,6 @@ const VideoLayout: React.FC<Props> = ({
     return (
       <div className={styles.videoInlineLayout} data-testid={testId('inline-layout')}>
         <div className={styles.player}>{player}</div>
-        {renderRelatedVideos(isTablet)}
         <div className={styles.videoDetailsInline}>
           <VideoDetailsInline
             title={secondaryMetadata || title}
@@ -178,6 +176,7 @@ const VideoLayout: React.FC<Props> = ({
             trailerButton={trailerButton}
           />
         </div>
+        {renderRelatedVideos(isTablet)}
         {children}
       </div>
     );

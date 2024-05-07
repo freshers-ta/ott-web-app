@@ -29,6 +29,7 @@ type Props = {
   busy?: boolean;
   id?: string;
   as?: 'button' | 'a';
+  activeClassname?: string;
 } & React.AriaAttributes;
 
 const Button: React.FC<Props> = ({
@@ -42,16 +43,18 @@ const Button: React.FC<Props> = ({
   size = 'medium',
   disabled,
   busy,
-  type,
+  type = 'button',
   to,
   as = 'button',
   onClick,
   className,
+  activeClassname = '',
   ...rest
 }: Props) => {
   const buttonClassName = (isActive: boolean) =>
     classNames(styles.button, className, styles[color], styles[variant], {
       [styles.active]: isActive,
+      [activeClassname]: isActive,
       [styles.fullWidth]: fullWidth,
       [styles.large]: size === 'large',
       [styles.small]: size === 'small',
@@ -76,7 +79,7 @@ const Button: React.FC<Props> = ({
   }
 
   return (
-    <button className={buttonClassName(active)} onClick={onClick} type={type} disabled={disabled} aria-disabled={disabled} {...rest}>
+    <button className={buttonClassName(active)} onClick={disabled ? undefined : onClick} type={type} aria-disabled={disabled} {...rest}>
       {content}
     </button>
   );

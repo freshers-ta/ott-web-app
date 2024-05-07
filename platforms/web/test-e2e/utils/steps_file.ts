@@ -42,7 +42,7 @@ const stepsObj = {
   logout: async function (this: CodeceptJS.I) {
     await this.openMainMenu();
 
-    this.click('div[aria-label="Log out"]');
+    this.click('text=Log out');
   },
   // This function will register the user on the first call and return the context
   // then assuming context is passed in the next time, will log that same user back in
@@ -129,7 +129,7 @@ const stepsObj = {
     const requiredTextInputNames: string[] = await this.executeScript(
       ([container, crfFieldSelector]: [string, string]) =>
         Array.from(document.querySelectorAll(`${container} ${crfFieldSelector}`))
-          .filter((element) => !element.querySelector('label')?.innerText.includes('(Optional)'))
+          .filter((element) => element.querySelector('label')?.innerText.includes('*'))
           .map((element) => (element.querySelector('input[type="text"]') as HTMLInputElement)?.name),
       [container, constants.customRegFields.crfTextInput],
     );
@@ -146,7 +146,7 @@ const stepsObj = {
     const requiredRadioValues: string[] = await this.executeScript(
       ([container, crfFieldSelector]: [string, string]) =>
         Array.from(document.querySelectorAll(`${container} ${crfFieldSelector}`))
-          .filter((element) => !(element.querySelector('[data-testid="radio-header"]') as HTMLElement)?.innerText.includes('(Optional)'))
+          .filter((element) => (element.querySelector('[data-testid="radio-header"]') as HTMLElement)?.innerText.includes('*'))
           .map((element) => (element.querySelector('input[type="radio"]') as HTMLInputElement)?.value),
       [container, constants.customRegFields.crfRadioBox],
     );
@@ -164,7 +164,7 @@ const stepsObj = {
       const querySelector = ['crf-select', 'crf-country', 'crf-us_state'].map((testId) => `${container} [data-testid="${testId}"]`).join(', ');
 
       return Array.from(document.querySelectorAll(querySelector))
-        .filter((element) => !element.querySelector('label')?.innerText.includes('(Optional)'))
+        .filter((element) => element.querySelector('label')?.innerText.includes('*'))
         .map((element) => element.querySelector('select')?.name);
     }, container);
 
@@ -185,7 +185,7 @@ const stepsObj = {
     const requiredDatepickerIds: string[] = await this.executeScript(
       ([container, crfFieldSelector]: [string, string]) =>
         Array.from(document.querySelectorAll(`${container} ${crfFieldSelector}`))
-          .filter((element) => !element.querySelector('label')?.innerText.includes('(Optional)'))
+          .filter((element) => element.querySelector('label')?.innerText.includes('*'))
           .map((element) => element.id),
       [container, constants.customRegFields.crfDateField],
     );
@@ -278,13 +278,13 @@ const stepsObj = {
     return isMobile;
   },
   openMenuDrawer: function (this: CodeceptJS.I) {
-    this.click('div[aria-label="Open menu"]');
+    this.click('button[aria-label="Open menu"]');
   },
   openUserMenu: function (this: CodeceptJS.I) {
-    this.click('div[aria-label="Open user menu"]');
+    this.click('button[aria-label="Open user menu"]');
   },
   clickCloseButton: function (this: CodeceptJS.I) {
-    this.click('div[aria-label="Close"]');
+    this.click('button[aria-label="Close panel"]');
   },
   seeAll: function (this: CodeceptJS.I, allStrings: string[]) {
     allStrings.forEach((s) => this.see(s));
@@ -363,7 +363,7 @@ const stepsObj = {
     for (let i = 0; i < tries; i++) {
       // In theory this expression can be simplified, but without the typeof's codecept throws an error when the value is undefined.
       const state = await this.executeScript(() =>
-        typeof window.jwplayer === 'undefined' || typeof window.jwplayer().getState === 'undefined' ? '' : jwplayer().getState(),
+        typeof window.jwplayer === 'undefined' || typeof window.jwplayer().getState === 'undefined' ? '' : window.jwplayer().getState(),
       );
 
       this.say(`Waiting for Player state. Expected: "${expectedState}", Current: "${state}"`);
@@ -385,7 +385,7 @@ const stepsObj = {
     this.dontSeeElement('div[class*="jwplayer"]');
     this.dontSeeElement('video');
     // eslint-disable-next-line no-console
-    assert.equal(await this.executeScript(() => (typeof jwplayer === 'undefined' ? undefined : jwplayer().getState)), undefined);
+    assert.equal(await this.executeScript(() => (typeof window.jwplayer === 'undefined' ? undefined : window.jwplayer().getState)), undefined);
   },
   isMobile: async function (this: CodeceptJS.I): Promise<boolean> {
     return await this.executeScript(() => {
@@ -449,13 +449,8 @@ const stepsObj = {
       }`);
     });
   },
-  seeVideoDetailsBackgroundImage: async function (this: CodeceptJS.I, name: string, src: string) {
-    const imageLocator = locate({ css: `div[data-testid="video-details"] img[alt="${name}"]` });
-    const imgSrc = await this.grabAttributeFrom(imageLocator, 'src');
-    assert.equal(imgSrc, src, "img element src attribute doesn't match");
-  },
-  seeEpgChannelLogoImage: async function (this: CodeceptJS.I, channelId: string, src: string) {
-    const imageLocator = locate({ css: `div[data-testid="${channelId}"] img[alt="Logo"]` });
+  seeEpgChannelLogoImage: async function (this: CodeceptJS.I, channelId: string, src: string, alt: string) {
+    const imageLocator = locate({ css: `div[data-testid="${channelId}"] img[alt="${alt}"]` });
     const imgSrc = await this.grabAttributeFrom(imageLocator, 'src');
     assert.equal(imgSrc, src, "img element src attribute doesn't match");
   },
@@ -468,6 +463,7 @@ const stepsObj = {
   ) {
     const cardLocator = `//a[@data-testid="${name}"]`;
     const shelfLocator = shelf ? makeShelfXpath(shelf) : undefined;
+    const gridCellLocator = locate(cardLocator).inside('//div[@role="gridcell"]');
 
     this.scrollPageToTop();
     this.wait(1);
@@ -487,16 +483,22 @@ const stepsObj = {
     const isMobile = await this.isMobile();
     // Easy way to limit to 10 swipes
     for (let i = 0; i < 10; i++) {
-      const [isElementVisible, tabindex] = await within(shelfLocator || 'body', async () => {
+      const [isWithinGridCell, isElementVisible, tabindex] = await within(shelfLocator || 'body', async () => {
+        const isWithinGridCell = (await this.grabNumberOfVisibleElements(gridCellLocator)) >= 1;
         const isElementVisible = (await this.grabNumberOfVisibleElements(cardLocator)) >= 1;
         const tabindex = isElementVisible ? Number(await this.grabAttributeFrom(cardLocator, 'tabindex')) : -1;
 
-        return [isElementVisible, tabindex];
+        return [isWithinGridCell, isElementVisible, tabindex];
       });
 
       // If the item isn't virtualized yet, throw an error (we need more information)
       if (!shelfLocator && !isElementVisible) {
         throw `Can't find item with locator: "${cardLocator}". Try specifying which shelf to look in.`;
+      }
+
+      // CardGrid component uses keyboard or regular mouse (click) navigation
+      if (isWithinGridCell) {
+        break;
       }
 
       if (tabindex >= 0) {
@@ -510,7 +512,7 @@ const stepsObj = {
           direction: scrollToTheRight ? 'left' : 'right',
         });
       } else {
-        this.click({ css: `div[aria-label="Slide ${scrollToTheRight ? 'right' : 'left'}"]` }, shelfLocator);
+        this.click({ css: `div[aria-label="${scrollToTheRight ? 'Next slide' : 'Previous slide'}"]` }, shelfLocator);
       }
 
       this.wait(1);

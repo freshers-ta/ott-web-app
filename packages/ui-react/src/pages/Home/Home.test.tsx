@@ -1,6 +1,4 @@
 import React from 'react';
-import type { UseQueryResult } from 'react-query';
-import type { Playlist } from '@jwp/ott-common/types/playlist';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
 
 import { renderWithRouter } from '../../../test/utils';
@@ -11,6 +9,7 @@ describe('Home Component tests', () => {
   test('Home test', () => {
     useConfigStore.setState({
       config: {
+        siteId: 'test',
         description: '',
         integrations: {},
         assets: {},
@@ -31,9 +30,9 @@ describe('Home Component tests', () => {
       },
     });
 
-    vi.mock('@jwp/ott-hooks-react/src/usePlaylist.ts', () => ({
-      default: (): UseQueryResult<Playlist | undefined> => {
-        return {
+    vi.mock('@jwp/ott-hooks-react/src/usePlaylists.ts', () => ({
+      default: () => {
+        const mockResult = {
           dataUpdatedAt: 0,
           error: null,
           errorUpdatedAt: 0,
@@ -89,6 +88,8 @@ describe('Home Component tests', () => {
             ],
           },
         };
+
+        return [mockResult, mockResult];
       },
     }));
 

@@ -18,6 +18,8 @@
   --card-tag-bg: #{theme.$card-tag-bg};
 }
 
+@include accessibility.globalClassNames;
+
 body {
   margin: 0;
   padding: 0;
@@ -74,4 +76,8 @@ h6 {
   body {
     font-size: 18px;
   }
+}
+
+input {
+  font-family: var(--body-font-family);
 }

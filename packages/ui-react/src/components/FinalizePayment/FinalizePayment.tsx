@@ -4,14 +4,15 @@ import { useLocation, useNavigate } from 'react-router';
 import { useSearchParams } from 'react-router-dom';
 import { getModule } from '@jwp/ott-common/src/modules/container';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
-import CheckoutController from '@jwp/ott-common/src/stores/CheckoutController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
+import CheckoutController from '@jwp/ott-common/src/controllers/CheckoutController';
 import { ACCESS_MODEL } from '@jwp/ott-common/src/constants';
 import useEventCallback from '@jwp/ott-hooks-react/src/useEventCallback';
 
 import Button from '../Button/Button';
 import Spinner from '../Spinner/Spinner';
 import { modalURLFromLocation } from '../../utils/location';
+import { useAriaAnnouncer } from '../../containers/AnnouncementProvider/AnnoucementProvider';
 
 import styles from './FinalizePayment.module.scss';
 
@@ -20,6 +21,7 @@ const FinalizePayment = () => {
   const checkoutController = getModule(CheckoutController);
 
   const { t } = useTranslation('account');
+  const announce = useAriaAnnouncer();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,8 +41,9 @@ const FinalizePayment = () => {
 
     try {
       await checkoutController.finalizeAdyenPayment({ redirectResult: decodeURI(redirectResult) }, orderId);
-      await accountController.reloadActiveSubscription({ delay: 2000 });
+      await accountController.reloadSubscriptions({ delay: 2000 });
 
+      announce(t('checkout.payment_success'), 'success');
       navigate(paymentSuccessUrl);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -70,7 +73,7 @@ const FinalizePayment = () => {
           />
         </>
       ) : (
-        <div className={styles.loading}>
+        <div>
           <Spinner />
         </div>
       )}

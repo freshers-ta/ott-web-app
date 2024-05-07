@@ -5,7 +5,7 @@ import { mockService } from '@jwp/ott-common/test/mockService';
 import ApiService from '@jwp/ott-common/src/services/ApiService';
 import GenericEntitlementService from '@jwp/ott-common/src/services/GenericEntitlementService';
 import JWPEntitlementService from '@jwp/ott-common/src/services/JWPEntitlementService';
-import WatchHistoryController from '@jwp/ott-common/src/stores/WatchHistoryController';
+import WatchHistoryController from '@jwp/ott-common/src/controllers/WatchHistoryController';
 
 import { renderWithRouter } from '../../../test/utils';
 
@@ -19,7 +19,7 @@ describe('<Cinema>', () => {
     mockService(WatchHistoryController, {});
   });
 
-  test('renders and matches snapshot', () => {
+  test('renders and matches snapshot', async () => {
     const item = {
       description: 'Test item description',
       duration: 354,
@@ -38,10 +38,19 @@ describe('<Cinema>', () => {
       tracks: [],
     } as PlaylistItem;
 
-    const { container } = renderWithRouter(
-      <Cinema item={item} onPlay={() => null} onPause={() => null} open={true} title={item.title} primaryMetadata="Primary metadata" />,
+    const { baseElement } = renderWithRouter(
+      <Cinema
+        item={item}
+        onPlay={() => null}
+        onPause={() => null}
+        open
+        title={item.title}
+        primaryMetadata="Primary metadata"
+        onClose={vi.fn()}
+        onNext={vi.fn()}
+      />,
     );
 
-    expect(container).toMatchSnapshot();
+    expect(baseElement).toMatchSnapshot();
   });
 });

@@ -1,51 +1,57 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
-import { mockService } from '@jwp/ott-common/test/mockService';
-import { DEFAULT_FEATURES } from '@jwp/ott-common/src/constants';
+import Language from '@jwp/ott-theme/assets/icons/language.svg?react';
 
-import Button from '../Button/Button';
+import Icon from '../Icon/Icon';
 
 import Header from './Header';
+import HeaderSkipLink from './HeaderSkipLink';
+import HeaderMenu from './HeaderMenu';
+import HeaderBrand from './HeaderBrand';
+import HeaderNavigation from './HeaderNavigation';
+import HeaderActions from './HeaderActions';
+import HeaderActionButton from './HeaderActionButton';
 
 vi.mock('react-router-dom', () => ({
   NavLink: () => 'a',
+  Link: () => 'a',
 }));
 
 describe('<Header />', () => {
-  beforeEach(() => {
-    // TODO: remove AccountController from component
-    mockService(AccountController, { getFeatures: () => DEFAULT_FEATURES });
+  test('renders header', () => {
+    const { container } = render(
+      <Header searchActive={false}>
+        <HeaderSkipLink />
+        <HeaderMenu onClick={vi.fn()} sideBarOpen={false} />
+        <HeaderBrand logoSrc={undefined} setLogoLoaded={vi.fn()} siteName="OTT Web App" />
+        <HeaderNavigation navItems={[]} />
+        <HeaderActions>
+          <HeaderActionButton>
+            <Icon icon={Language} />
+          </HeaderActionButton>
+        </HeaderActions>
+      </Header>,
+    );
+
+    expect(container).toMatchSnapshot();
   });
 
-  test('renders header', () => {
-    const playlistMenuItems = [<Button key="key" label="Home" to="/" />];
+  test('renders header with nav buttons', () => {
+    const navItems = [
+      { label: 'Home', to: '/' },
+      { label: 'Button test', to: '/test' },
+    ];
     const { container } = render(
-      <Header
-        onMenuButtonClick={vi.fn()}
-        searchBarProps={{
-          query: '',
-          onQueryChange: vi.fn(),
-        }}
-        searchEnabled
-        searchActive={false}
-        onSearchButtonClick={vi.fn()}
-        onCloseSearchButtonClick={vi.fn()}
-        onLoginButtonClick={vi.fn()}
-        userMenuOpen={false}
-        openUserMenu={vi.fn()}
-        closeUserMenu={vi.fn()}
-        openLanguageMenu={vi.fn()}
-        closeLanguageMenu={vi.fn()}
-        isLoggedIn={false}
-        canLogin={true}
-        showPaymentsMenuItem={true}
-        supportedLanguages={[]}
-        languageMenuOpen={false}
-        currentLanguage={undefined}
-        onLanguageClick={vi.fn()}
-      >
-        {playlistMenuItems}
+      <Header searchActive={false}>
+        <HeaderSkipLink />
+        <HeaderMenu onClick={vi.fn()} sideBarOpen={false} />
+        <HeaderBrand logoSrc="/logo.png" setLogoLoaded={vi.fn()} siteName="OTT Web App" />
+        <HeaderNavigation navItems={navItems} />
+        <HeaderActions>
+          <HeaderActionButton>
+            <Icon icon={Language} />
+          </HeaderActionButton>
+        </HeaderActions>
       </Header>,
     );
 

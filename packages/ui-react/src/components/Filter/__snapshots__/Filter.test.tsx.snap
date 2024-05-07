@@ -8,32 +8,40 @@ exports[`<Filter> > renders Filter 1`] = `
     role="listbox"
   >
     <button
+      aria-selected="false"
       class="_button_f8f296 _default_f8f296 _outlined_f8f296"
       role="option"
+      type="button"
     >
       <span>
         x
       </span>
     </button>
     <button
+      aria-selected="false"
       class="_button_f8f296 _default_f8f296 _outlined_f8f296"
       role="option"
+      type="button"
     >
       <span>
         y
       </span>
     </button>
     <button
+      aria-selected="false"
       class="_button_f8f296 _default_f8f296 _outlined_f8f296"
       role="option"
+      type="button"
     >
       <span>
         z
       </span>
     </button>
     <button
+      aria-selected="false"
       class="_button_f8f296 _default_f8f296 _outlined_f8f296"
       role="option"
+      type="button"
     >
       <span>
         bb

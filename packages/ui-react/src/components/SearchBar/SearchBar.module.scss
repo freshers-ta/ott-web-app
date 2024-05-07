@@ -3,7 +3,10 @@
 
 .searchBar {
   position: relative;
-  height: variables.$search-height;
+}
+
+.searchForm {
+    height: variables.$search-height;
 }
 
 .icon {
@@ -22,7 +25,7 @@
   font-weight: var(--body-font-weight-bold);
   font-size: 16px;
 
-  background: rgba(variables.$black, 0.54);
+  background: variables.$black;
 
   border: 1px solid rgba(variables.$white, 0.32);
   border-radius: 4px;
@@ -34,6 +37,10 @@
     opacity: 0.5;
   }
 
+  &::-webkit-search-cancel-button{
+    display: none;
+  }
+
   &:focus,
   &:active {
     border-color: variables.$white;
@@ -43,7 +50,6 @@
 
 .clearButton {
   position: absolute;
-  top: -2px;
   right: 0;
 
   > svg {

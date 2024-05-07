@@ -9,6 +9,7 @@ import { PersonalShelf } from '@jwp/ott-common/src/constants';
 import ChevronLeft from '@jwp/ott-theme/assets/icons/chevron_left.svg?react';
 import ChevronRight from '@jwp/ott-theme/assets/icons/chevron_right.svg?react';
 import useBreakpoint, { Breakpoint, type Breakpoints } from '@jwp/ott-ui-react/src/hooks/useBreakpoint';
+import type { PosterAspectRatio } from '@jwp/ott-common/src/utils/collection';
 
 import TileDock from '../TileDock/TileDock';
 import Card from '../Card/Card';
@@ -46,7 +47,7 @@ export type ShelfProps = {
   accessModel: AccessModel;
   isLoggedIn: boolean;
   hasSubscription: boolean;
-  posterAspect?: string;
+  posterAspect?: PosterAspectRatio;
   visibleTilesDelta?: number;
 };
 
@@ -73,6 +74,7 @@ const Shelf = ({
   const renderTile = useCallback(
     (item: PlaylistItem, isInView: boolean) => {
       const url = mediaURL({ media: item, playlistId: playlist.feedid, play: type === PersonalShelf.ContinueWatching });
+
       return (
         <Card
           key={item.mediaid}
@@ -97,7 +99,7 @@ const Shelf = ({
         className={styles.chevron}
         role="button"
         tabIndex={0}
-        aria-label={t('slide_right')}
+        aria-label={t('slide_next')}
         onKeyDown={(event: React.KeyboardEvent) => (event.key === 'Enter' || event.key === ' ') && handleSlide(doSlide)}
         onClick={() => handleSlide(doSlide)}
       >
@@ -115,7 +117,7 @@ const Shelf = ({
         })}
         role="button"
         tabIndex={didSlideBefore ? 0 : -1}
-        aria-label={t('slide_left')}
+        aria-label={t('slide_previous')}
         onKeyDown={(event: React.KeyboardEvent) => (event.key === 'Enter' || event.key === ' ') && handleSlide(doSlide)}
         onClick={() => handleSlide(doSlide)}
       >
@@ -129,6 +131,12 @@ const Shelf = ({
     <span key={pageIndex} className={classNames(styles.dot, { [styles.active]: index === pageIndex })} />
   );
 
+  const renderPageIndicator = (pageIndex: number, pages: number) => (
+    <div aria-live="polite" className="hidden">
+      {t('slide_indicator', { page: pageIndex + 1, pages })}
+    </div>
+  );
+
   const handleSlide = (doSlide: () => void): void => {
     setDidSlideBefore(true);
     doSlide();
@@ -137,20 +145,21 @@ const Shelf = ({
   if (error || !playlist?.playlist) return <h2 className={styles.error}>Could not load items</h2>;
 
   return (
-    <div className={classNames(styles.shelf, { [styles.featured]: featured })}>
-      {!featured ? <h2 className={classNames(styles.title, { [styles.loading]: loading })}>{title || playlist.title}</h2> : null}
+    <div className={classNames(styles.shelf)}>
+      {!featured ? <h2 className={classNames(styles.title)}>{title || playlist.title}</h2> : null}
       <TileDock<PlaylistItem>
         items={playlist.playlist}
         tilesToShow={tilesToShow}
         wrapWithEmptyTiles={featured && playlist.playlist.length === 1}
         cycleMode={'restart'}
-        showControls={!matchMedia('(hover: none)').matches && !loading}
+        showControls={!loading}
         showDots={featured}
         transitionTime={'0.3s'}
         spacing={8}
         renderLeftControl={renderLeftControl}
         renderRightControl={renderRightControl}
         renderPaginationDots={renderPaginationDots}
+        renderPageIndicator={renderPageIndicator}
         renderTile={renderTile}
       />
     </div>

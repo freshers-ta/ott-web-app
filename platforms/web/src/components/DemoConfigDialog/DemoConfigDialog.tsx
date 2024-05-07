@@ -5,12 +5,13 @@ import { Helmet } from 'react-helmet';
 import { createURL } from '@jwp/ott-common/src/utils/urlFormatting';
 import { CONFIG_QUERY_KEY } from '@jwp/ott-common/src/constants';
 import ErrorPage from '@jwp/ott-ui-react/src/components/ErrorPage/ErrorPage';
-import TextField from '@jwp/ott-ui-react/src/components/TextField/TextField';
+import TextField from '@jwp/ott-ui-react/src/components/form-fields/TextField/TextField';
 import Button from '@jwp/ott-ui-react/src/components/Button/Button';
 import ConfirmationDialog from '@jwp/ott-ui-react/src/components/ConfirmationDialog/ConfirmationDialog';
 import LoadingOverlay from '@jwp/ott-ui-react/src/components/LoadingOverlay/LoadingOverlay';
 import DevStackTrace from '@jwp/ott-ui-react/src/components/DevStackTrace/DevStackTrace';
 import type { BootstrapData } from '@jwp/ott-hooks-react/src/useBootstrapApp';
+import { AppError } from '@jwp/ott-common/src/utils/error';
 
 import styles from './DemoConfigDialog.module.scss';
 
@@ -52,6 +53,9 @@ const DemoConfigDialog = ({ query }: { query: BootstrapData }) => {
   const navigateCallback = getConfigNavigateCallback(navigate);
 
   const [state, setState] = useState<State>(initialState);
+
+  const errorTitle = error && error instanceof AppError ? error.payload.title : '';
+  const errorDescription = error && error instanceof AppError ? error.payload.description : '';
 
   const configNavigate = async (configSource: string | undefined) => {
     setState((s) => ({ ...s, configSource: configSource, error: undefined }));
@@ -160,8 +164,8 @@ const DemoConfigDialog = ({ query }: { query: BootstrapData }) => {
       {!isSuccess && (
         <div className={styles.configModal}>
           <ErrorPage
-            title={error?.payload?.title || t('app_config_not_found')}
-            message={error?.payload?.description || ''}
+            title={errorTitle || t('app_config_not_found')}
+            message={errorDescription}
             learnMoreLabel={t('app_config_learn_more')}
             helpLink={'https://docs.jwplayer.com/platform/docs/ott-create-an-app-config'}
             error={typeof state.error === 'string' ? undefined : state.error}

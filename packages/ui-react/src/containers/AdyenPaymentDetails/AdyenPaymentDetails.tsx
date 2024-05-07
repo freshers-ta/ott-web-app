@@ -4,15 +4,16 @@ import type DropinElement from '@adyen/adyen-web/dist/types/components/Dropin/Dr
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { AdyenPaymentSession } from '@jwp/ott-common/types/checkout';
 import { getModule } from '@jwp/ott-common/src/modules/container';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
-import CheckoutController from '@jwp/ott-common/src/stores/CheckoutController';
-import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
+import CheckoutController from '@jwp/ott-common/src/controllers/CheckoutController';
+import { modalURLFromLocation, modalURLFromWindowLocation } from '@jwp/ott-ui-react/src/utils/location';
 import { ADYEN_LIVE_CLIENT_KEY, ADYEN_TEST_CLIENT_KEY } from '@jwp/ott-common/src/constants';
 import useQueryParam from '@jwp/ott-ui-react/src/hooks/useQueryParam';
 import useEventCallback from '@jwp/ott-hooks-react/src/useEventCallback';
-import { createURL } from '@jwp/ott-common/src/utils/urlFormatting';
+import { useTranslation } from 'react-i18next';
 
 import Adyen from '../../components/Adyen/Adyen';
+import { useAriaAnnouncer } from '../AnnouncementProvider/AnnoucementProvider';
 
 type Props = {
   setProcessing: (loading: boolean) => void;
@@ -27,6 +28,8 @@ export default function AdyenPaymentDetails({ setProcessing, type, setPaymentErr
   const checkoutController = getModule(CheckoutController);
 
   const isSandbox = accountController.getSandbox();
+  const { t } = useTranslation('account');
+  const announce = useAriaAnnouncer();
   const navigate = useNavigate();
   const location = useLocation();
   const [session, setSession] = useState<AdyenPaymentSession>();
@@ -40,10 +43,12 @@ export default function AdyenPaymentDetails({ setProcessing, type, setPaymentErr
       setProcessing(true);
 
       await checkoutController.finalizeAdyenPaymentDetails({ redirectResult: decodeURI(redirectResult) }, paymentMethodId);
-      await accountController.reloadActiveSubscription({ delay: 2000 });
+      await accountController.reloadSubscriptions({ delay: 2000 });
 
       setProcessing(false);
-      navigate(modalURLFromLocation(location, 'payment-method-success'));
+
+      announce(t('checkout.payment_success'), 'success');
+      navigate(paymentSuccessUrl);
     } catch (error: unknown) {
       setProcessing(false);
 
@@ -90,14 +95,14 @@ export default function AdyenPaymentDetails({ setProcessing, type, setPaymentErr
         setProcessing(true);
         setPaymentError(undefined);
 
-        const returnUrl = createURL(window.location.href, { u: 'payment-method', paymentMethodId: `${paymentMethodId}` });
+        const returnUrl = modalURLFromWindowLocation('payment-method', { paymentMethodId: `${paymentMethodId}` });
         const result = await checkoutController.addAdyenPaymentDetails(state.data.paymentMethod, paymentMethodId, returnUrl);
 
         if ('action' in result) {
           handleAction(result.action);
         }
 
-        await accountController.reloadActiveSubscription({ delay: 2000 });
+        await accountController.reloadSubscriptions({ delay: 2000 });
 
         navigate(paymentSuccessUrl, { replace: true });
       } catch (error: unknown) {

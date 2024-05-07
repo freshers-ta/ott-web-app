@@ -8,6 +8,8 @@ import './modules/register';
 
 import App from './App';
 
+import { attachAccessibilityListener } from '#src/utils/accessibility';
+
 // Collect env vars
 configureEnv({
   APP_VERSION: import.meta.env.APP_VERSION,
@@ -17,7 +19,13 @@ configureEnv({
 
   APP_DEFAULT_CONFIG_SOURCE: import.meta.env.APP_DEFAULT_CONFIG_SOURCE,
   APP_PLAYER_LICENSE_KEY: import.meta.env.APP_PLAYER_LICENSE_KEY,
+
+  APP_FOOTER_TEXT: import.meta.env.APP_FOOTER_TEXT,
+  APP_BODY_FONT: import.meta.env.APP_BODY_FONT,
+  APP_BODY_ALT_FONT: import.meta.env.APP_BODY_ALT_FONT,
 });
+
+attachAccessibilityListener();
 
 const rootElement = document.getElementById('root');
 
@@ -28,4 +36,7 @@ if (rootElement) {
   console.info('Application - rootElement not found');
 }
 
-registerSW();
+const refresh = registerSW({
+  immediate: true,
+  onNeedRefresh: () => refresh(true),
+});

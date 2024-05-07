@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { getModule } from '@jwp/ott-common/src/modules/container';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
 import { queryClient } from '@jwp/ott-ui-react/src/containers/QueryProvider/QueryProvider';
 import { simultaneousLoginWarningKey } from '@jwp/ott-common/src/constants';
 import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
+import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
+import useEventCallback from '@jwp/ott-hooks-react/src/useEventCallback';
+import type { AccountModals } from '@jwp/ott-ui-react/src/containers/AccountModal/AccountModal';
 
 enum NotificationsTypes {
   ACCESS_REVOKED = 'access.revoked',
@@ -18,12 +21,18 @@ enum NotificationsTypes {
   ACCOUNT_LOGOUT = 'account.logout',
 }
 
-export default function useNotifications(uuid: string = '') {
+export default function useNotifications() {
   const navigate = useNavigate();
   const location = useLocation();
+  const uuid = useAccountStore((s) => (typeof s.user?.uuid === 'string' ? s.user.uuid : undefined));
 
   const accountController = getModule(AccountController);
   const { hasNotifications } = accountController?.getFeatures() || {};
+
+  // use an eventCallback to prevent the `location` property being stale when used directly in the useEffect below
+  const navigateToModal = useEventCallback((path: keyof AccountModals | null, queryParams?: Record<string, string>) => {
+    navigate(modalURLFromLocation(location, path, queryParams));
+  });
 
   useEffect(() => {
     if (!uuid || !hasNotifications) return;
@@ -38,17 +47,17 @@ export default function useNotifications(uuid: string = '') {
             case NotificationsTypes.FAILED:
             case NotificationsTypes.CARD_FAILED:
             case NotificationsTypes.SUBSCRIBE_FAILED:
-              navigate(modalURLFromLocation(location, 'payment-error', { message: notification.resource?.message }));
+              navigateToModal('payment-error', notification.resource?.message);
               break;
             case NotificationsTypes.CARD_SUCCESS:
               await queryClient.invalidateQueries(['entitlements']);
-              navigate(modalURLFromLocation(location, null));
+              navigateToModal(null); // close modal
               break;
             case NotificationsTypes.SUBSCRIBE_SUCCESS:
-              await accountController.reloadActiveSubscription();
+              await accountController.reloadSubscriptions();
               break;
             case NotificationsTypes.ACCESS_REVOKED:
-              await accountController.reloadActiveSubscription();
+              await accountController.reloadSubscriptions();
               break;
             case NotificationsTypes.CARD_REQUIRES_ACTION:
             case NotificationsTypes.SUBSCRIBE_REQUIRES_ACTION:
@@ -59,7 +68,7 @@ export default function useNotifications(uuid: string = '') {
                 await accountController?.logout();
               } finally {
                 if (notification.resource?.reason === 'sessions_limit') {
-                  navigate(modalURLFromLocation(location, 'login', { message: simultaneousLoginWarningKey }));
+                  navigateToModal('login', { message: simultaneousLoginWarningKey });
                 }
               }
               break;
@@ -69,6 +78,5 @@ export default function useNotifications(uuid: string = '') {
         }
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountController, uuid]);
+  }, [accountController, hasNotifications, navigateToModal, uuid]);
 }

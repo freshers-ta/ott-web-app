@@ -19,50 +19,80 @@ exports[`<Payment> > renders and matches snapshot 1`] = `
     </div>
     <div>
       <div
-        class="_textField_e16c1b"
+        class="_formField_86f2f5 _textField_c799b0"
       >
         <label
-          class="_label_e16c1b"
-          for="text-field_1235"
+          class="_label_86f2f5"
+          for="text-field_1235_cardnumber"
         >
           user:payment.card_number
         </label>
-        <p>
-          •••• •••• •••• 0002
-        </p>
+        <input
+          aria-describedby="helper_text_1235_cardnumber"
+          aria-invalid="false"
+          aria-label="user:payment.card_number_hidden"
+          aria-required="false"
+          autocomplete="cc-number"
+          class="_input_859b20"
+          id="text-field_1235_cardnumber"
+          name="cardNumber"
+          readonly=""
+          type="text"
+          value="•••• •••• •••• 0002"
+        />
       </div>
       <div
         class="_cardDetails_c57ff5"
       >
         <div
-          class="_textField_e16c1b"
+          class="_formField_86f2f5 _textField_c799b0"
         >
           <label
-            class="_label_e16c1b"
-            for="text-field_1235"
+            class="_label_86f2f5"
+            for="text-field_1235_cardexpiry"
           >
             user:payment.expiry_date
           </label>
-          <p>
-            03/2030
-          </p>
+          <input
+            aria-describedby="helper_text_1235_cardexpiry"
+            aria-invalid="false"
+            aria-required="false"
+            autocomplete="cc-exp"
+            class="_input_859b20"
+            id="text-field_1235_cardexpiry"
+            name="cardExpiry"
+            readonly=""
+            type="text"
+            value="03/2030"
+          />
         </div>
         <div
-          class="_textField_e16c1b"
+          class="_formField_86f2f5 _textField_c799b0"
         >
           <label
-            class="_label_e16c1b"
-            for="text-field_1235"
+            class="_label_86f2f5"
+            for="text-field_1235_cardsecuritycode"
           >
             user:payment.security_code
           </label>
-          <p>
-            ******
-          </p>
+          <input
+            aria-describedby="helper_text_1235_cardsecuritycode"
+            aria-invalid="false"
+            aria-label="user:payment.security_code_hidden"
+            aria-required="false"
+            autocomplete="cc-csc"
+            class="_input_859b20"
+            id="text-field_1235_cardsecuritycode"
+            name="cardSecurityCode"
+            readonly=""
+            type="text"
+            value="******"
+          />
         </div>
       </div>
       <button
         class="_button_f8f296 _default_f8f296 _outlined_f8f296"
+        type="button"
       >
         <span>
           account:payment.edit_card
@@ -100,7 +130,7 @@ exports[`<Payment> > renders and matches snapshot 1`] = `
         class="_transactionDetails_c57ff5"
       >
         <div
-          class="_transationPrice_c57ff5"
+          class="_transactionPrice_c57ff5"
         >
           user:payment.price_paid_with
         </div>
@@ -126,7 +156,7 @@ exports[`<Payment> > renders and matches snapshot 1`] = `
         class="_transactionDetails_c57ff5"
       >
         <div
-          class="_transationPrice_c57ff5"
+          class="_transactionPrice_c57ff5"
         >
           user:payment.price_paid_with
         </div>
@@ -152,7 +182,7 @@ exports[`<Payment> > renders and matches snapshot 1`] = `
         class="_transactionDetails_c57ff5"
       >
         <div
-          class="_transationPrice_c57ff5"
+          class="_transactionPrice_c57ff5"
         >
           user:payment.price_paid_with
         </div>

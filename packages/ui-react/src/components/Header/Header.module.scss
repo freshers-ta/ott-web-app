@@ -77,7 +77,17 @@
   flex: 1;
   align-items: center;
 
-  > a {
+  > ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    li {
+      display: inline-block;
+    }
+  }
+
+  a {
     height: 36px;
     min-height: 36px;
     margin: 0 6px;
@@ -121,15 +131,12 @@
 .actions {
   position: relative;
   display: flex;
+  gap: calc(variables.$base-spacing / 2);
 
   @include responsive.mobile-and-tablet() {
     // the search container wants to position itself against the header
     position: static;
   }
-}
-
-.actionButton {
-  margin-left: calc(#{variables.$base-spacing} / 2);
 }
 
 //
@@ -139,54 +146,30 @@
   max-width: 180px;
 }
 
-//
-// Header search container
-//
-.searchContainer {
-  position: absolute;
-  left: -#{variables.$search-bar-width-desktop};
-  display: flex;
-  width: variables.$search-bar-width-desktop;
-
-  > div:first-child {
-    flex: 1;
-  }
-
-  @include responsive.mobile-and-tablet() {
-    right: 0;
-    left: 0;
-    width: auto;
-  }
-}
-
-//
-// Container for the user button(s)
-//
-.buttonContainer {
-  // this is a visual fix for putting a button with background besides a transparent button
-  margin-left: variables.$base-spacing;
-
-  > button:first-child {
-    margin-right: calc(#{variables.$base-spacing} / 2);
-  }
-}
-
-.userMenuButton {
-  margin-left: 8px;
-}
-
 .brandCentered {
   .brand {
     text-align: center;
   }
 }
-.profile {
-  display: flex;
-  align-items: center;
-  h2 {
-    cursor: pointer;
+
+.navButton {
+  overflow: visible;
+
+  &::after {
+    position: absolute;
+    bottom: calc(((variables.$header-height - 36px) / 2) * -1);
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: variables.$white;
+    content: '';
+  }
+
+  body:global(.is-tabbing) &:focus::after {
+    display: none;
   }
 }
+
 //
 // mediaQueries
 // --------------------------------
@@ -213,8 +196,7 @@
   .searchActive {
     .menu,
     .brand,
-    .buttonContainer,
-    .actionButton {
+    .actions > *:not(:first-child) { // all action buttons except the search bar
       display: none;
     }
   }
@@ -226,11 +208,14 @@
   }
 
   .brand {
+    margin-right: 0;
+    margin-left: 0;
     text-align: center;
   }
 
   .menu,
   .actions {
+    justify-content: flex-end;
     width: 80px;
   }
 }

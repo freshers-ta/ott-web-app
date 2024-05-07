@@ -1,17 +1,21 @@
-import { useTranslation } from 'react-i18next';
-import { object, type SchemaOf, string } from 'yup';
-import { useLocation, useNavigate } from 'react-router';
-import { useCallback, useEffect, useState } from 'react';
-import { useMutation } from 'react-query';
-import type { DeleteAccountFormData } from '@jwp/ott-common/types/account';
 import { getModule } from '@jwp/ott-common/src/modules/container';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
+import type { DeleteAccountFormData } from '@jwp/ott-common/types/account';
 import useForm from '@jwp/ott-hooks-react/src/useForm';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useMutation } from 'react-query';
+import { useLocation, useNavigate } from 'react-router';
+import { object, string } from 'yup';
+import { FormValidationError } from '@jwp/ott-common/src/errors/FormValidationError';
+import classNames from 'classnames';
 
-import PasswordField from '../PasswordField/PasswordField';
-import Button from '../Button/Button';
-import Alert from '../Alert/Alert';
+import { useAriaAnnouncer } from '../../containers/AnnouncementProvider/AnnoucementProvider';
 import { modalURLFromLocation } from '../../utils/location';
+import Button from '../Button/Button';
+import PasswordField from '../form-fields/PasswordField/PasswordField';
+import useQueryParam from '../../hooks/useQueryParam';
+import FormFeedback from '../FormFeedback/FormFeedback';
 
 import styles from './DeleteAccountModal.module.scss';
 
@@ -19,108 +23,106 @@ const DeleteAccountModal = () => {
   const accountController = getModule(AccountController);
 
   const { t } = useTranslation('user');
+  const announce = useAriaAnnouncer();
+  const u = useQueryParam('u');
 
   const [enteredPassword, setEnteredPassword] = useState<string>('');
-
-  const deleteAccount = useMutation(accountController.deleteAccountData, {
-    onSuccess: async () => {
-      await accountController.logout();
-      navigate('/');
-    },
-    onError: () => {
-      setEnteredPassword('');
-    },
-  });
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const validationSchema: SchemaOf<DeleteAccountFormData> = object().shape({
-    password: string().required(t('login.field_required')),
-  });
-  const initialValues: DeleteAccountFormData = { password: '' };
   const {
     handleSubmit,
     handleChange,
     values,
     errors,
+    setErrors,
     reset: resetForm,
-  } = useForm(
-    initialValues,
-    () => {
+  } = useForm<DeleteAccountFormData>({
+    initialValues: { password: '' },
+    validationSchema: object().shape({ password: string().required(t('login.field_required')) }),
+    onSubmit: (values) => {
       setEnteredPassword(values.password);
       navigate(modalURLFromLocation(location, 'delete-account-confirmation'), { replace: true });
     },
-    validationSchema,
-  );
+  });
+
+  const deleteAccount = useMutation(accountController.deleteAccountData, {
+    onSuccess: async () => {
+      navigate('/');
+      await accountController.logout();
+      announce(t('account.delete_account.success'), 'success');
+    },
+    onError: (error: unknown) => {
+      if (error instanceof FormValidationError) {
+        setErrors(error.errors);
+        navigate(modalURLFromLocation(location, 'delete-account'), { replace: true });
+      }
+      setEnteredPassword('');
+    },
+  });
 
   useEffect(() => {
-    if (!location.search.includes('delete-account-confirmation') && enteredPassword) {
-      // handle back button
-      setEnteredPassword('');
-      resetForm();
-    }
-    if (location.search.includes('delete-account-confirmation') && !enteredPassword) {
+    // when the user navigates directly to the confirmation step
+    if (u === 'delete-account-confirmation' && !enteredPassword) {
       navigate(modalURLFromLocation(location, 'delete-account'), { replace: true });
     }
-  }, [location, location.search, navigate, enteredPassword, deleteAccount, resetForm]);
-
-  const handleError = useCallback(() => {
-    deleteAccount.reset();
-    resetForm();
-    setEnteredPassword('');
-    navigate(modalURLFromLocation(location, 'delete-account'), { replace: true });
-  }, [location, navigate, setEnteredPassword, deleteAccount, resetForm]);
+  }, [location, u, navigate, enteredPassword, deleteAccount, resetForm]);
 
   const handleCancel = useCallback(() => {
     navigate(modalURLFromLocation(location, null), { replace: true });
   }, [location, navigate]);
 
-  if (deleteAccount.isError) {
-    return <Alert open isSuccess={false} onClose={handleError} message={t('account.delete_account.error')} />;
+  // step 2: delete account confirmation
+  if (enteredPassword) {
+    return (
+      <div>
+        <h2 className={styles.heading}>{t('account.delete_account.title')}</h2>
+        <div className={styles.disclaimer}>
+          <p>{t('account.delete_account.modal.text_data_erasure')}</p>
+          <p>{t('account.delete_account.modal.text_revoked_access')}</p>
+          <div className={styles.warningBox}>
+            <p>{t('account.delete_account.modal.warning')}</p>
+          </div>
+          <p>
+            {t('account.delete_account.modal.text_cant_be_undone')} <br />
+            {t('account.delete_account.modal.text_contacts')}
+          </p>
+        </div>
+        <div className={styles.buttons}>
+          <Button disabled={deleteAccount.isLoading} variant="text" label={t('account.cancel')} onClick={handleCancel} />
+          <Button
+            disabled={deleteAccount.isLoading}
+            variant="delete"
+            label={t('account.delete_account.title')}
+            onClick={() => {
+              deleteAccount.mutate(enteredPassword);
+            }}
+          />
+        </div>
+      </div>
+    );
   }
 
-  return enteredPassword ? (
-    <div className={styles.formContainer}>
+  // step 1: enter your password
+  return (
+    <form onSubmit={handleSubmit}>
       <h2 className={styles.heading}>{t('account.delete_account.title')}</h2>
-      <div className={styles.innerContainer}>
-        <p className={styles.paragraph}>{t('account.delete_account.modal.text_data_erasure')}</p>
-        <p className={styles.paragraph}>{t('account.delete_account.modal.text_revoked_access')}</p>
-        <div className={styles.warningBox}>
-          <p className={styles.paragraph}>{t('account.delete_account.modal.warning')}</p>
-        </div>
-        <p className={styles.paragraph}>
-          {t('account.delete_account.modal.text_cant_be_undone')} <br />
-          {t('account.delete_account.modal.text_contacts')}
-        </p>
-      </div>
-      <div className={styles.buttonsContainer}>
-        <Button disabled={deleteAccount.isLoading} variant="text" label={t('account.cancel')} onClick={handleCancel} />
-        <Button
-          disabled={deleteAccount.isLoading}
-          variant="delete"
-          label={t('account.delete_account.title')}
-          onClick={() => {
-            deleteAccount.mutate(enteredPassword);
-          }}
-        />
-      </div>
-    </div>
-  ) : (
-    <form onSubmit={handleSubmit} className={`${styles.formContainer} ${styles.formContainerSmall}`}>
-      <h2 className={styles.heading}>{t('account.delete_account.modal.title')}</h2>
+      <p className={styles.paragraph}>{t('account.delete_account.modal.description')}</p>
+      {errors.form && <FormFeedback variant="error">{errors.form}</FormFeedback>}
       <PasswordField
         value={values.password}
         onChange={handleChange}
         label={t('account.password')}
         placeholder={t('account.delete_account.modal.placeholder')}
         error={!!errors.password || !!errors.form}
+        helperText={errors.password}
         name="password"
         showHelperText={false}
       />
-      <div className={styles.passwordButtonsContainer}>
-        <Button type="submit" className={styles.button} color="primary" fullWidth label={t('account.continue')} />
-        <Button type="button" onClick={handleCancel} className={styles.button} variant="text" fullWidth label={t('account.cancel')} />
+      <div className={classNames(styles.buttons, styles.stacked)}>
+        <Button type="submit" color="primary" label={t('account.continue')} fullWidth />
+        <Button type="button" onClick={handleCancel} variant="text" label={t('account.cancel')} fullWidth />
       </div>
     </form>
   );

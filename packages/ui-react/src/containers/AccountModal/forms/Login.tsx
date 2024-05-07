@@ -1,17 +1,17 @@
 import React from 'react';
-import { object, string, type SchemaOf } from 'yup';
+import { object, string } from 'yup';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router';
-import { useQueryClient } from 'react-query';
-import type { LoginFormData } from '@jwp/ott-common/types/account';
 import { getModule } from '@jwp/ott-common/src/modules/container';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
-import AccountController from '@jwp/ott-common/src/stores/AccountController';
-import useForm, { type UseFormOnSubmitHandler } from '@jwp/ott-hooks-react/src/useForm';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
+import useForm from '@jwp/ott-hooks-react/src/useForm';
 import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
 import useSocialLoginUrls from '@jwp/ott-hooks-react/src/useSocialLoginUrls';
+import type { LoginFormData } from '@jwp/ott-common/types/account';
 
 import LoginForm from '../../../components/LoginForm/LoginForm';
+import { useAriaAnnouncer } from '../../AnnouncementProvider/AnnoucementProvider';
 
 type Props = {
   messageKey: string | null;
@@ -24,49 +24,38 @@ const Login: React.FC<Props> = ({ messageKey }: Props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation('account');
+  const announce = useAriaAnnouncer();
 
   const socialLoginURLs = useSocialLoginUrls(window.location.href.split('?')[0]);
 
-  const queryClient = useQueryClient();
+  const { values, errors, submitting, validationSchemaError, handleSubmit, handleChange } = useForm<LoginFormData>({
+    initialValues: { email: '', password: '' },
+    validationSchema: object().shape({
+      email: string()
+        .email(t('login.field_is_not_valid_email'))
+        .required(t('login.field_required', { field: t('login.email') })),
+      password: string().required(t('login.field_required', { field: t('login.password') })),
+    }),
+    onSubmit: ({ email, password }) => accountController.login(email, password, window.location.href),
+    onSubmitSuccess: () => {
+      announce(t('login.sign_in_success'), 'success');
 
-  const loginSubmitHandler: UseFormOnSubmitHandler<LoginFormData> = async (formData, { setErrors, setSubmitting, setValue }) => {
-    try {
-      await accountController.login(formData.email, formData.password, window.location.href);
-      await queryClient.invalidateQueries(['listProfiles']);
-
-      // close modal
       navigate(modalURLFromLocation(location, null));
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (error.message.toLowerCase().includes('invalid param email')) {
-          setErrors({ email: t('login.wrong_email') });
-        } else {
-          setErrors({ form: t('login.wrong_combination') });
-        }
-        setValue('password', '');
-      }
-    }
-
-    setSubmitting(false);
-  };
-
-  const validationSchema: SchemaOf<LoginFormData> = object().shape({
-    email: string().email(t('login.field_is_not_valid_email')).required(t('login.field_required')),
-    password: string().required(t('login.field_required')),
+    },
+    onSubmitError: ({ resetValue }) => resetValue('password'),
   });
-  const initialValues: LoginFormData = { email: '', password: '' };
-  const { handleSubmit, handleChange, values, errors, submitting } = useForm(initialValues, loginSubmitHandler, validationSchema);
 
   return (
     <LoginForm
-      messageKey={messageKey}
-      onSubmit={handleSubmit}
-      onChange={handleChange}
       values={values}
+      validationError={validationSchemaError}
       errors={errors}
       submitting={submitting}
       siteName={siteName}
       socialLoginURLs={socialLoginURLs}
+      messageKey={messageKey}
+      onSubmit={handleSubmit}
+      onChange={handleChange}
     />
   );
 };

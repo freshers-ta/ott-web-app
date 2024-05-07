@@ -1,56 +1,62 @@
-import { useQuery } from 'react-query';
-import { useMemo, useState } from 'react';
+import { useMutation } from 'react-query';
+import { useEffect } from 'react';
 import { shallow } from '@jwp/ott-common/src/utils/compare';
-import type { OfferType } from '@jwp/ott-common/types/account';
-import type { Offer } from '@jwp/ott-common/types/checkout';
 import { getModule } from '@jwp/ott-common/src/modules/container';
 import { useCheckoutStore } from '@jwp/ott-common/src/stores/CheckoutStore';
-import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
-import CheckoutController from '@jwp/ott-common/src/stores/CheckoutController';
-import { isSVODOffer } from '@jwp/ott-common/src/utils/subscription';
-import { ACCESS_MODEL } from '@jwp/ott-common/src/constants';
+import CheckoutController from '@jwp/ott-common/src/controllers/CheckoutController';
+import AccountController from '@jwp/ott-common/src/controllers/AccountController';
+import type { OfferType } from '@jwp/ott-common/types/checkout';
 
 const useOffers = () => {
   const checkoutController = getModule(CheckoutController);
+  const accountController = getModule(AccountController);
 
-  const { accessModel } = useConfigStore();
-  const offers = checkoutController.getSubscriptionOfferIds();
+  const { mediaOffers, subscriptionOffers, switchSubscriptionOffers, requestedMediaOffers } = useCheckoutStore(
+    ({ mediaOffers, subscriptionOffers, switchSubscriptionOffers, requestedMediaOffers }) => ({
+      mediaOffers,
+      subscriptionOffers,
+      switchSubscriptionOffers,
+      requestedMediaOffers,
+    }),
+    shallow,
+  );
 
-  const { requestedMediaOffers } = useCheckoutStore(({ requestedMediaOffers }) => ({ requestedMediaOffers }), shallow);
-  const hasTvodOffer = (requestedMediaOffers || []).some((offer) => offer.offerId);
-  const hasPremierOffer = (requestedMediaOffers || []).some((offer) => offer.premier);
-  const isPPV = hasTvodOffer || hasPremierOffer;
-  const [offerType, setOfferType] = useState<OfferType>(accessModel === ACCESS_MODEL.SVOD && !isPPV ? 'svod' : 'tvod');
+  const { mutate: initialise, isLoading: isInitialisationLoading } = useMutation<void>({
+    mutationKey: ['initialiseOffers', requestedMediaOffers],
+    mutationFn: checkoutController.initialiseOffers,
+  });
 
-  const offerIds: string[] = useMemo(() => {
-    return [...(requestedMediaOffers || []).map(({ offerId }) => offerId), ...offers].filter(Boolean);
-  }, [requestedMediaOffers, offers]);
+  const chooseOffer = useMutation({
+    mutationKey: ['chooseOffer'],
+    mutationFn: checkoutController.chooseOffer,
+  });
 
-  const { data: allOffers, isLoading } = useQuery(['offers', offerIds.join('-')], () => checkoutController.getOffers({ offerIds }));
+  const switchSubscription = useMutation({
+    mutationKey: ['switchSubscription'],
+    mutationFn: checkoutController.switchSubscription,
+    onSuccess: () => accountController.reloadSubscriptions({ delay: 7500 }), // @todo: Is there a better way to wait?
+  });
 
-  // The `offerQueries` variable mutates on each render which prevents the useMemo to work properly.
-  return useMemo(() => {
-    const offers = (allOffers || []).filter((offer: Offer) => (offerType === 'tvod' ? !isSVODOffer(offer) : isSVODOffer(offer)));
-    const hasMultipleOfferTypes = (allOffers || []).some((offer: Offer) => (offerType === 'tvod' ? isSVODOffer(offer) : !isSVODOffer(offer)));
+  useEffect(() => {
+    initialise();
+  }, [requestedMediaOffers, initialise]);
 
-    const offersDict = (!isLoading && Object.fromEntries(offers.map((offer: Offer) => [offer.offerId, offer]))) || {};
-    // we need to get the offerIds from the offer responses since it contains different offerIds based on the customers'
-    // location. E.g. if an offer is configured as `S12345678` it becomes `S12345678_US` in the US.
-    const defaultOfferId = (!isLoading && offers[offers.length - 1]?.offerId) || '';
+  const hasMediaOffers = mediaOffers.length > 0;
+  const hasSubscriptionOffers = subscriptionOffers.length > 0;
+  const hasPremierOffers = requestedMediaOffers.some((mediaOffer) => mediaOffer.premier);
+  const hasMultipleOfferTypes = (subscriptionOffers.length > 0 || switchSubscriptionOffers.length > 0) && hasMediaOffers && !hasPremierOffers;
+  const defaultOfferType: OfferType = hasPremierOffers || !hasSubscriptionOffers ? 'tvod' : 'svod';
 
-    return {
-      hasTVODOffers: offers.some((offer: Offer) => !isSVODOffer(offer)),
-      hasMultipleOfferTypes,
-      isLoading,
-      hasPremierOffer,
-      defaultOfferId,
-      offerType,
-      setOfferType,
-      offers,
-      offersDict,
-      isTvodRequested: hasTvodOffer,
-    };
-  }, [allOffers, isLoading, hasPremierOffer, offerType, hasTvodOffer]);
+  return {
+    isLoading: isInitialisationLoading || chooseOffer.isLoading,
+    mediaOffers,
+    subscriptionOffers,
+    switchSubscriptionOffers,
+    chooseOffer,
+    switchSubscription,
+    hasMultipleOfferTypes,
+    defaultOfferType,
+  };
 };
 
 export default useOffers;

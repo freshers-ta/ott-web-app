@@ -111,10 +111,9 @@ function runTestSuite(config: typeof testConfigs.svod, providerName: string) {
     I.submitForm();
 
     I.see(incorrectLogin);
-    I.seeCssPropertiesOnElements(formFeedback, { 'background-color': 'rgb(255, 12, 62)' });
 
-    checkField(I, 'email', true);
-    checkField(I, 'password', true);
+    checkField(I, 'email');
+    checkField(I, 'password');
 
     // Failed login maintains the email but clears the password field
     I.waitForValue('input[name=email]', 'danny@email.com', 0);

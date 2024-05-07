@@ -12,29 +12,41 @@ export type Props = {
   query?: string;
   onQueryChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onClearButtonClick?: () => void;
+  onClose?: () => void;
   inputRef?: React.MutableRefObject<HTMLInputElement>;
 };
 
-const SearchBar: React.FC<Props> = ({ query, onQueryChange, onClearButtonClick, inputRef }: Props) => {
+const SearchBar: React.FC<Props> = ({ query, onQueryChange, onClearButtonClick, onClose, inputRef }: Props) => {
   const { t } = useTranslation('search');
+  const handleSubmit = (event: React.ChangeEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    inputRef?.current.focus(); // Force hide mobile keyboard
+    (document.querySelector('#content') as HTMLElement)?.focus();
+  };
 
   return (
     <div className={styles.searchBar}>
       <Icon icon={Search} className={styles.icon} />
-      <input
-        className={styles.input}
-        type="text"
-        value={query}
-        onChange={onQueryChange}
-        aria-label={t('search_bar.search_label')}
-        placeholder={t('search_bar.search_placeholder')}
-        ref={inputRef}
-      />
-      {query ? (
-        <IconButton className={styles.clearButton} aria-label={t('search_bar.clear_search_label')} onClick={onClearButtonClick}>
-          <Icon icon={Cancel} />
-        </IconButton>
-      ) : null}
+      <form className={styles.searchForm} role="search" onSubmit={handleSubmit}>
+        <label htmlFor="searchbar-input" className="hidden">
+          {t('search_bar.search_label')}
+        </label>
+        <input
+          className={styles.input}
+          id="searchbar-input"
+          type="search"
+          value={query}
+          onChange={onQueryChange}
+          onKeyDown={(event) => event.key === 'Escape' && onClose?.()}
+          placeholder={t('search_bar.search_placeholder')}
+          ref={inputRef}
+        />
+        {query ? (
+          <IconButton className={styles.clearButton} aria-label={t('search_bar.clear_search_label')} onClick={onClearButtonClick}>
+            <Icon icon={Cancel} />
+          </IconButton>
+        ) : null}
+      </form>
     </div>
   );
 };

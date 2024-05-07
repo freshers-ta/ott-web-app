@@ -3,7 +3,9 @@
   color: var(--primary-color);
   font-family: var(--body-alt-font-family);
 
-  &:hover {
+  &:hover,
+  &:focus-within
+  {
     .chevron {
       opacity: 1;
       &.disabled {
@@ -27,10 +29,14 @@
 }
 
 .chevron {
-  padding: 12px 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
+  width: 44px;
+  height: 44px;
   outline-color: var(--highlight-color, white);
   cursor: pointer;
-  opacity: 0;
   transition: transform 0.3s ease-out, opacity 0.3s ease-out;
 
   > svg {

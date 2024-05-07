@@ -23,6 +23,7 @@ export type TileDockProps<T> = {
   renderLeftControl?: (handleClick: () => void) => ReactNode;
   renderRightControl?: (handleClick: () => void) => ReactNode;
   renderPaginationDots?: (index: number, pageIndex: number) => ReactNode;
+  renderPageIndicator?: (pageIndex: number, pages: number) => ReactNode;
 };
 
 type Tile<T> = {
@@ -74,6 +75,7 @@ function TileDock<T>({
   renderLeftControl,
   renderRightControl,
   renderPaginationDots,
+  renderPageIndicator,
 }: TileDockProps<T>) {
   const [index, setIndex] = useState(0);
   const [slideToIndex, setSlideToIndex] = useState(0);
@@ -235,8 +237,9 @@ function TileDock<T>({
     if (showDots && isMultiPage && !!renderPaginationDots) {
       const length = pages;
 
+      // Using aria-hidden="true" due to virtualization issues, making pagination purely visual for now. This is a temporary fix pending a more accessible solution.
       return (
-        <div className={styles.dots}>
+        <div aria-hidden="true" className={styles.dots}>
           {Array.from({ length }, (_, pageIndex) => {
             return renderPaginationDots(index, pageIndex);
           })}
@@ -246,13 +249,14 @@ function TileDock<T>({
   };
 
   return (
-    <div>
+    <React.Fragment>
       <div className={styles.tileDock}>
         {showLeftControl && !!renderLeftControl && <div className={styles.leftControl}>{renderLeftControl(() => slide('left'))}</div>}
         <ul ref={frameRef} style={ulStyle} onTouchStart={handleTouchStart} onTransitionEnd={handleTransitionEnd}>
           {wrapWithEmptyTiles ? (
             <li
               className={styles.emptyTile}
+              aria-hidden="true"
               style={{
                 width: `${tileWidth}%`,
                 paddingLeft: spacing / 2,
@@ -267,6 +271,7 @@ function TileDock<T>({
             return (
               <li
                 key={tile.key}
+                aria-hidden={!isInView}
                 className={classNames({ [styles.notInView]: !isInView })}
                 style={{
                   width: `${tileWidth}%`,
@@ -283,6 +288,7 @@ function TileDock<T>({
           {wrapWithEmptyTiles ? (
             <li
               className={styles.emptyTile}
+              aria-hidden="true"
               style={{
                 width: `${tileWidth}%`,
                 paddingLeft: spacing / 2,
@@ -295,7 +301,8 @@ function TileDock<T>({
         {showRightControl && !!renderRightControl && <div className={styles.rightControl}>{renderRightControl(() => slide('right'))}</div>}
       </div>
       {paginationDots()}
-    </div>
+      {isMultiPage && renderPageIndicator && renderPageIndicator(Math.ceil(index / tilesToShow), Math.ceil(pages))}
+    </React.Fragment>
   );
 }
 

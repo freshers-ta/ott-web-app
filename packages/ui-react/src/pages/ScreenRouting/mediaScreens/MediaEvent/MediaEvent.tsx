@@ -7,8 +7,7 @@ import type { PlaylistItem } from '@jwp/ott-common/types/playlist';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
 import { MediaStatus } from '@jwp/ott-common/src/utils/liveEvent';
-import { isLocked } from '@jwp/ott-common/src/utils/entitlements';
-import { formatLiveEventMetaString } from '@jwp/ott-common/src/utils/formatting';
+import { createLiveEventMetadata } from '@jwp/ott-common/src/utils/metadata';
 import { mediaURL } from '@jwp/ott-common/src/utils/urlFormatting';
 import { generateMovieJSONLD } from '@jwp/ott-common/src/utils/structuredData';
 import useMedia from '@jwp/ott-hooks-react/src/useMedia';
@@ -29,6 +28,7 @@ import FavoriteButton from '../../../../containers/FavoriteButton/FavoriteButton
 import Button from '../../../../components/Button/Button';
 import InlinePlayer from '../../../../containers/InlinePlayer/InlinePlayer';
 import StatusIcon from '../../../../components/StatusIcon/StatusIcon';
+import VideoMetaData from '../../../../components/VideoMetaData/VideoMetaData';
 import Icon from '../../../../components/Icon/Icon';
 
 const MediaEvent: ScreenComponent<PlaylistItem> = ({ data: media, isLoading }) => {
@@ -61,7 +61,8 @@ const MediaEvent: ScreenComponent<PlaylistItem> = ({ data: media, isLoading }) =
 
   // User, entitlement
   const { user, subscription } = useAccountStore(({ user, subscription }) => ({ user, subscription }), shallow);
-  const { isEntitled } = useEntitlement(media);
+  const { isEntitled, mediaOffers } = useEntitlement(media);
+  const hasMediaOffers = !!mediaOffers.length;
 
   // Handlers
   const goBack = () => media && navigate(mediaURL({ media, playlistId, play: false }));
@@ -83,6 +84,7 @@ const MediaEvent: ScreenComponent<PlaylistItem> = ({ data: media, isLoading }) =
   // Effects
   useEffect(() => {
     (document.scrollingElement || document.body).scroll({ top: 0 });
+    (document.querySelector('#video-details button') as HTMLElement)?.focus();
   }, [id]);
 
   // UI
@@ -92,12 +94,19 @@ const MediaEvent: ScreenComponent<PlaylistItem> = ({ data: media, isLoading }) =
   const primaryMetadata = (
     <>
       <StatusIcon mediaStatus={media.mediaStatus} />
-      {formatLiveEventMetaString(media, i18n.language)}
+      <VideoMetaData attributes={createLiveEventMetadata(media, i18n.language)} />
     </>
   );
 
   const shareButton = <ShareButton title={media.title} description={media.description} url={canonicalUrl} />;
-  const startWatchingButton = <StartWatchingButton item={media} playUrl={mediaURL({ media, playlistId, play: true })} disabled={!liveEvent.isPlayable} />;
+  const startWatchingButton = (
+    <StartWatchingButton
+      key={id} // necessary to fix autofocus on TalkBack
+      item={media}
+      playUrl={mediaURL({ media, playlistId, play: true })}
+      disabled={!liveEvent.isPlayable}
+    />
+  );
 
   const favoriteButton = isFavoritesEnabled && <FavoriteButton item={media} />;
   const trailerButton = (!!trailerItem || isTrailerLoading) && (
@@ -168,7 +177,8 @@ const MediaEvent: ScreenComponent<PlaylistItem> = ({ data: media, isLoading }) =
               onComplete={handleComplete}
               feedId={playlistId ?? undefined}
               startWatchingButton={startWatchingButton}
-              paywall={isLocked(accessModel, isLoggedIn, hasSubscription, media)}
+              isEntitled={isEntitled}
+              hasMediaOffers={hasMediaOffers}
               autostart={liveEvent.isPlayable && (play || undefined)}
               playable={liveEvent.isPlayable}
             />

@@ -10,7 +10,7 @@ import { simultaneousLoginWarningKey } from '@jwp/ott-common/src/constants';
 import Visibility from '@jwp/ott-theme/assets/icons/visibility.svg?react';
 import VisibilityOff from '@jwp/ott-theme/assets/icons/visibility_off.svg?react';
 
-import TextField from '../TextField/TextField';
+import TextField from '../form-fields/TextField/TextField';
 import Button from '../Button/Button';
 import Link from '../Link/Link';
 import IconButton from '../IconButton/IconButton';
@@ -28,13 +28,14 @@ type Props = {
   error?: string;
   errors: FormErrors<LoginFormData>;
   values: LoginFormData;
+  validationError?: boolean;
   submitting: boolean;
   socialLoginURLs: SocialLoginURLs | null;
   siteName?: string;
   messageKey: string | null;
 };
 
-const LoginForm: React.FC<Props> = ({ onSubmit, onChange, socialLoginURLs, values, errors, submitting, siteName, messageKey }: Props) => {
+const LoginForm: React.FC<Props> = ({ onSubmit, onChange, socialLoginURLs, values, errors, validationError, submitting, siteName, messageKey }: Props) => {
   const [viewPassword, toggleViewPassword] = useToggle();
   const { t } = useTranslation('account');
   const location = useLocation();
@@ -54,38 +55,44 @@ const LoginForm: React.FC<Props> = ({ onSubmit, onChange, socialLoginURLs, value
           <FormFeedback variant="warning">{getTranslatedErrorMessage(messageKey)}</FormFeedback>
         </div>
       )}
+      {errors.form ? (
+        <FormFeedback variant="error" visible={!validationError}>
+          {errors.form}
+        </FormFeedback>
+      ) : null}
 
       <SocialButtonsList socialLoginURLs={socialLoginURLs} />
       <h2 className={styles.title}>{t('login.sign_in')}</h2>
-      {errors.form ? <FormFeedback variant="error">{errors.form}</FormFeedback> : null}
       <TextField
         value={values.email}
         onChange={onChange}
         label={t('login.email')}
         placeholder={t('login.email')}
-        error={!!errors.email || !!errors.form}
+        error={!!errors.email}
         helperText={errors.email}
         name="email"
         type="email"
         required
         testId="login-email-input"
+        autoComplete="email"
       />
       <TextField
         value={values.password}
         onChange={onChange}
         label={t('login.password')}
         placeholder={t('login.password')}
-        error={!!errors.password || !!errors.form}
+        error={!!errors.password}
         helperText={errors.password}
         name="password"
         type={viewPassword ? 'text' : 'password'}
         rightControl={
-          <IconButton aria-label={viewPassword ? t('login.hide_password') : t('login.view_password')} onClick={() => toggleViewPassword()}>
+          <IconButton aria-label={t('login.view_password')} onClick={() => toggleViewPassword()} aria-pressed={viewPassword}>
             <Icon icon={viewPassword ? Visibility : VisibilityOff} />
           </IconButton>
         }
         required
         testId="login-password-input"
+        autoComplete="current-password"
       />
       {submitting && <LoadingOverlay transparentBackground inline />}
       <Link className={styles.link} to={modalURLFromLocation(location, 'forgot-password')}>
