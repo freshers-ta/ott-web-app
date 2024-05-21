@@ -3,22 +3,6 @@
 @use '@jwp/ott-ui-react/src/styles/mixins/responsive';
 
 //
-// jwSidebarBackdrop
-// --------------------------------
-
-.backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: variables.$sidebar-z-index - 1;
-  display: none;
-  width: 100%;
-  height: 100%;
-  background: theme.$modal-backdrop-bg;
-  transition: all 0.3s ease;
-}
-
-//
 // jwSidebar
 // --------------------------------
 
@@ -26,20 +10,17 @@
   position: fixed;
   top: 0;
   z-index: variables.$sidebar-z-index;
-  display: none;
+  display: inline-block;
   width: 270px;
   max-width: 90vw;
   height: 100dvh;
   overflow-y: auto;
   background-color: var(--body-background-color);
-  transform: translateX(-100%);
-  transition: transform 0.3s cubic-bezier(0.52, 0.51, 0.2, 1);
 
   ul {
     margin: 0;
-    padding: 0 0 calc(#{variables.$base-spacing} / 2) 0;
+    padding: 0;
     list-style-type: none;
-    border-bottom: 1px solid rgba(variables.$white, 0.12);
   }
 }
 
@@ -50,33 +31,9 @@
 
 .group {
   display: flex;
+  gap: variables.$base-spacing;
   flex-direction: column;
   max-height: 100%;
   padding: variables.$base-spacing 0;
   -webkit-overflow-scrolling: touch;
-}
-
-//
-// mediaQueries
-// --------------------------------
-
-@include responsive.mobile-and-tablet() {
-  .sidebar {
-    display: inline-block;
-
-    &.open {
-      transform: translateX(0);
-    }
-  }
-
-  .backdrop {
-    display: inline-block;
-    visibility: hidden;
-    opacity: 0;
-
-    &.visible {
-      visibility: visible;
-      opacity: 1;
-    }
-  }
 }

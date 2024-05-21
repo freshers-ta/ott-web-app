@@ -16,6 +16,19 @@
   }
 }
 
+.popover {
+  top: 10px;
+}
+
+.buttonContainer {
+  // this is a visual fix for putting a button with background besides a transparent button
+  margin-left: variables.$base-spacing;
+
+  > button:first-child {
+    margin-right: calc(#{variables.$base-spacing} / 2);
+  }
+}
+
 .menuItems {
   width: auto;
   margin: 0;
@@ -26,10 +39,6 @@
     padding: 0 18px;
     font-size: 16px;
   }
-}
-
-.button {
-  margin-bottom: variables.$base-spacing;
 }
 
 .divider {

@@ -40,7 +40,6 @@ describe('<LoginForm>', () => {
         errors={{}}
         socialLoginURLs={socialLoginURLs}
         submitting={false}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
@@ -62,15 +61,14 @@ describe('<LoginForm>', () => {
         errors={{}}
         socialLoginURLs={null}
         submitting={false}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
 
     await waitForWithFakeTimers();
 
-    expect(getByLabelText('login.email')).toHaveValue('myemail@email.com');
-    expect(getByLabelText('login.password')).toHaveValue('mypassword');
+    expect(getByLabelText('login.email', { exact: false })).toHaveValue('myemail@email.com');
+    expect(getByLabelText('login.password', { exact: false })).toHaveValue('mypassword');
   });
 
   test('sets the correct errors in the form fields', async () => {
@@ -85,7 +83,6 @@ describe('<LoginForm>', () => {
         errors={{ email: 'Email error', password: 'Password error', form: 'Form error' }}
         socialLoginURLs={null}
         submitting={false}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
@@ -109,7 +106,6 @@ describe('<LoginForm>', () => {
         errors={{}}
         socialLoginURLs={null}
         submitting={true}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
@@ -133,7 +129,6 @@ describe('<LoginForm>', () => {
         errors={{}}
         socialLoginURLs={null}
         submitting={true}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
@@ -161,14 +156,13 @@ describe('<LoginForm>', () => {
         errors={{}}
         socialLoginURLs={null}
         submitting={true}
-        messageKey={null}
       />,
       { wrapper: createWrapper() },
     );
 
     act(() => {
-      fireEvent.change(getByLabelText('login.email'), { target: { value: 'email' } });
-      fireEvent.change(getByLabelText('login.password'), { target: { value: 'password' } });
+      fireEvent.change(getByLabelText('login.email', { exact: false }), { target: { value: 'email' } });
+      fireEvent.change(getByLabelText('login.password', { exact: false }), { target: { value: 'password' } });
     });
 
     await waitForWithFakeTimers();
