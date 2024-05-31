@@ -6,7 +6,7 @@ export default class ConsoleTransporter implements LogTransporter {
   constructor(readonly logLevel: LogLevel) {}
 
   log(level: LogLevel, scope: string, message: string, extra?: Record<string, unknown>, error?: Error) {
-    if (this.logLevel === LogLevel.SILENT) return;
+    if (level < this.logLevel) return;
 
     switch (level) {
       case LogLevel.ERROR:

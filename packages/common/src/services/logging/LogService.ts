@@ -7,14 +7,11 @@ import { LogLevel } from './LogLevel';
 
 @injectable()
 export default class LogService {
-  constructor(@optional() @multiInject(LOG_TRANSPORTER) private readonly loggers: LogTransporter[]) {}
+  constructor(@optional() @multiInject(LOG_TRANSPORTER) private readonly transporters: LogTransporter[]) {}
 
   private log(logLevel: LogLevel, scope: string, message: string, extra?: Record<string, unknown>, error?: Error) {
-    this.loggers.forEach((transporter) => {
-      // preventing the call here does limit options like adding breadcrumbs (which might be inferred from info logs) to Sentry calls
-      if (logLevel >= transporter.logLevel) {
-        transporter.log(logLevel, scope, message, extra, error);
-      }
+    this.transporters.forEach((transporter) => {
+      transporter.log(logLevel, scope, message, extra, error);
     });
   }
 
