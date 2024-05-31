@@ -9,8 +9,8 @@ import { useProfileStore } from '@jwp/ott-common/src/stores/ProfileStore';
 import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
 import ProfileController from '@jwp/ott-common/src/controllers/ProfileController';
 import AccountController from '@jwp/ott-common/src/controllers/AccountController';
-import { logDev } from '@jwp/ott-common/src/utils/common';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
+import { getLogger } from '@jwp/ott-common/src/log';
 
 export const useSelectProfile = (options?: { onSuccess: () => void; onError: () => void }) => {
   const accountController = getModule(AccountController, false);
@@ -25,9 +25,9 @@ export const useSelectProfile = (options?: { onSuccess: () => void; onError: () 
       await accountController?.loadUserData();
       options?.onSuccess?.();
     },
-    onError: () => {
+    onError: (error) => {
       useProfileStore.setState({ selectingProfileAvatar: null });
-      logDev('Unable to enter profile');
+      getLogger().error('useProfiles', 'Unable to enter profile', error);
       options?.onError?.();
     },
   });

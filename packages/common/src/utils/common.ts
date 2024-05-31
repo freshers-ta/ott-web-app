@@ -92,16 +92,6 @@ export const IS_PREVIEW_MODE = __mode__ === 'preview';
 // Production mode
 export const IS_PROD_MODE = __mode__ === 'prod';
 
-export function logDev(message: unknown, ...optionalParams: unknown[]) {
-  if ((IS_DEVELOPMENT_BUILD || IS_PREVIEW_MODE) && !IS_TEST_MODE) {
-    if (optionalParams.length > 0) {
-      console.info(message, optionalParams);
-    } else {
-      console.info(message);
-    }
-  }
-}
-
 export const isTruthyCustomParamValue = (value: unknown): boolean => ['true', '1', 'yes', 'on'].includes(String(value)?.toLowerCase());
 
 export const isFalsyCustomParamValue = (value: unknown): boolean => ['false', '0', 'no', 'off'].includes(String(value)?.toLowerCase());

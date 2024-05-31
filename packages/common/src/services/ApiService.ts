@@ -10,6 +10,7 @@ import type { GetPlaylistParams, Playlist, PlaylistItem } from '../../types/play
 import type { AdSchedule } from '../../types/ad-schedule';
 import type { EpisodeInSeries, EpisodesRes, EpisodesWithPagination, GetSeriesParams, Series } from '../../types/series';
 import env from '../env';
+import { getLogger } from '../log';
 
 // change the values below to change the property used to look up the alternate image
 enum ImageProperty {
@@ -37,7 +38,7 @@ export default class ApiService {
     const date = item[prop] as string | undefined;
 
     if (date && !isValid(new Date(date))) {
-      console.error(`Invalid "${prop}" date provided for the "${item.title}" media item`);
+      getLogger().error('ApiService', `Invalid "${prop}" date provided for the "${item.title}" media item`, new Error('Invalid date'));
       return undefined;
     }
 

@@ -1,5 +1,6 @@
 import type { PlaylistItem } from '../../types/playlist';
 import { RELATIVE_PATH_USER_MY_PROFILE, PATH_MEDIA, PATH_PLAYLIST, PATH_USER_MY_PROFILE } from '../paths';
+import { getLogger } from '../log';
 
 import { getLegacySeriesPlaylistIdFromEpisodeTags, getSeriesPlaylistIdFromCustomParams } from './media';
 
@@ -65,7 +66,7 @@ export const createPath = <Path extends string>(originalPath: Path, pathParams?:
       const paramValue = pathParams[paramName as keyof typeof pathParams];
 
       if (!paramValue) {
-        if (!isOptional) console.warn('Missing param in path creation.', { path: originalPath, paramName });
+        if (!isOptional) getLogger().warn('urlFormatting', `Missing param in path creation`, { path: originalPath, paramName });
 
         return '';
       }

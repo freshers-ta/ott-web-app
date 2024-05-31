@@ -4,8 +4,8 @@ import { injectable } from 'inversify';
 
 import EpgService from '../EpgService';
 import type { PlaylistItem } from '../../../types/playlist';
-import { logDev } from '../../utils/common';
 import type { EpgProgram } from '../../../types/epg';
+import { getLogger } from '../../log';
 
 const viewNexaEpgProgramSchema = object().shape({
   'episode-num': object().shape({
@@ -48,7 +48,7 @@ export default class ViewNexaEpgService extends EpgService {
     const scheduleUrl = item.scheduleUrl;
 
     if (!scheduleUrl) {
-      logDev('Tried requesting a schedule for an item with missing `scheduleUrl`', item);
+      getLogger().warn('ViewNexaEpgService', 'Tried requesting a schedule for an item with missing `scheduleUrl`', { item });
       return undefined;
     }
 
@@ -65,7 +65,7 @@ export default class ViewNexaEpgService extends EpgService {
       return schedule?.tv?.programme || [];
     } catch (error: unknown) {
       if (error instanceof Error) {
-        logDev(`Fetch failed for View Nexa EPG schedule: '${scheduleUrl}'`, error);
+        getLogger().error('ViewNexaEpgService', `Fetch failed for View Nexa EPG schedule: '${scheduleUrl}'`, error);
       }
     }
   };
