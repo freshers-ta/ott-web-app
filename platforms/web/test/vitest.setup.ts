@@ -4,8 +4,20 @@ import 'vi-fetch/setup';
 import 'reflect-metadata';
 import * as matchers from 'vitest-axe/matchers';
 import { expect } from 'vitest';
+import { mockService } from '@jwp/ott-common/test/mockService';
+import LogService from '@jwp/ott-common/src/services/logging/LogService';
 
 expect.extend(matchers);
+
+beforeEach(() => {
+  mockService(LogService, {
+    debug: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    fatal: () => {},
+  });
+});
 
 // a really simple BroadcastChannel stub. Normally, a Broadcast channel would not call event listeners on the same
 // instance. But for testing purposes, that really doesn't matter...

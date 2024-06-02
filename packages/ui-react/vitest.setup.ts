@@ -7,10 +7,24 @@ import type { ComponentType } from 'react';
 import { fireEvent } from '@testing-library/react';
 import * as matchers from 'vitest-axe/matchers';
 import { expect } from 'vitest';
+import { mockService } from '@jwp/ott-common/test/mockService';
+import LogService from '@jwp/ott-common/src/services/logging/LogService';
 
 expect.extend(matchers);
 
+beforeEach(() => {
+  mockService(LogService, {
+    debug: () => {},
+    info: () => {},
+    warn: () => {},
+    error: () => {},
+    fatal: () => {},
+  });
+});
+
 beforeAll(() => {
+  HTMLElement.prototype.scrollIntoView = vi.fn();
+
   // these methods don't exist in JSDOM: https://github.com/jsdom/jsdom/issues/3294
   HTMLDialogElement.prototype.show = vi.fn().mockImplementation(function (this: HTMLDialogElement) {
     this.setAttribute('open', '');
