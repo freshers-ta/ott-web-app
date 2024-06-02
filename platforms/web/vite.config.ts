@@ -55,8 +55,8 @@ export default ({ mode, command }: ConfigEnv): UserConfigExport => {
         // This is needed to do decorator transforms for ioc resolution to work for classes
         babel: { plugins: ['babel-plugin-transform-typescript-metadata', ['@babel/plugin-proposal-decorators', { legacy: true }]] },
       }),
-      eslintPlugin({ emitError: mode === 'production' || mode === 'demo' || mode === 'preview' }), // Move linting to pre-build to match dashboard
-      StylelintPlugin(),
+      mode !== 'test' && eslintPlugin({ emitError: mode === 'production' || mode === 'demo' || mode === 'preview' }), // Move linting to pre-build to match dashboard
+      mode !== 'test' && StylelintPlugin(),
       svgr(),
       VitePWA({
         registerType: 'autoUpdate',
