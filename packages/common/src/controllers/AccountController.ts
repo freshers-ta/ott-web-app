@@ -23,7 +23,7 @@ import { useAccountStore } from '../stores/AccountStore';
 import { useConfigStore } from '../stores/ConfigStore';
 import { useProfileStore } from '../stores/ProfileStore';
 import { FormValidationError } from '../errors/FormValidationError';
-import { getLogger } from '../log';
+import { logError } from '../Logger';
 
 import WatchHistoryController from './WatchHistoryController';
 import ProfileController from './ProfileController';
@@ -68,7 +68,7 @@ export default class AccountController {
         await this.getAccount();
       }
     } catch (error: unknown) {
-      getLogger().error('AccountController', 'Failed to get user', error);
+      logError('AccountController', 'Failed to get user', { error });
 
       // clear the session when the token was invalid
       // don't clear the session when the error is unknown (network hiccup or something similar)
@@ -441,7 +441,7 @@ export default class AccountController {
         pendingOffer = offerResponse.responseData;
       }
     } catch (error: unknown) {
-      getLogger().error('AccountController', 'Failed to fetch the pending offer', error);
+      logError('AccountController', 'Failed to fetch the pending offer', { error });
     }
 
     // let the app know to refresh the entitlements

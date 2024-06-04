@@ -6,7 +6,7 @@ import { CONFIG_FILE_STORAGE_KEY, CONFIG_QUERY_KEY, OTT_GLOBAL_PLAYER_ID } from 
 import { AppError } from '../utils/error';
 import type { Settings } from '../../types/settings';
 import env from '../env';
-import { getLogger } from '../log';
+import { logDebug, logWarn } from '../Logger';
 
 import StorageService from './StorageService';
 
@@ -44,7 +44,7 @@ export default class SettingsService {
         return configKey;
       }
 
-      getLogger().warn('SettingsService', `Invalid app-config query param: ${configKey}`);
+      logWarn('SettingsService', `Invalid app-config query param: ${configKey}`);
     }
     // Yes this falls through from above to look up the stored value if the query string is invalid and that's OK
 
@@ -56,7 +56,7 @@ export default class SettingsService {
         return storedSource;
       }
 
-      getLogger().warn('SettingsService', 'Invalid stored config: ' + storedSource);
+      logWarn('SettingsService', 'Invalid stored config: ' + storedSource);
       await this.storageService.removeItem(CONFIG_FILE_STORAGE_KEY);
     }
 
@@ -79,7 +79,7 @@ export default class SettingsService {
       .then((result) => result.text())
       .then((iniString) => ini.parse(iniString) as Settings)
       .catch((error) => {
-        getLogger().error('SettingsService', 'Failed to fetch or parse the ini settings', error);
+        logDebug('SettingsService', 'Failed to fetch or parse the ini settings', { error });
         // It's possible to not use the ini settings files, so an error doesn't have to be fatal
         return {} as Settings;
       });
@@ -106,7 +106,7 @@ export default class SettingsService {
 
     // The player key should be set if using the global ott player
     if (settings.playerId === OTT_GLOBAL_PLAYER_ID && !settings.playerLicenseKey) {
-      getLogger().warn('SettingsService', 'Using Global OTT Player without setting player key. Some features, such as analytics, may not work correctly.');
+      logWarn('SettingsService', 'Using Global OTT Player without setting player key. Some features, such as analytics, may not work correctly.');
     }
 
     // This will result in an unusable app

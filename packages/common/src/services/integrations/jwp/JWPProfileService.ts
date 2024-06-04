@@ -5,7 +5,7 @@ import defaultAvatar from '@jwp/ott-theme/assets/profiles/default_avatar.png';
 import ProfileService from '../ProfileService';
 import StorageService from '../../StorageService';
 import type { CreateProfile, DeleteProfile, EnterProfile, GetProfileDetails, ListProfiles, UpdateProfile } from '../../../../types/profiles';
-import { getLogger } from '../../../log';
+import { logError } from '../../../Logger';
 
 @injectable()
 export default class JWPProfileService extends ProfileService {
@@ -29,7 +29,7 @@ export default class JWPProfileService extends ProfileService {
           })) ?? [],
       };
     } catch (error: unknown) {
-      getLogger().error('JWPProfileService', 'Unable to list profiles', error);
+      logError('JWPProfileService', 'Unable to list profiles', { error });
       return {
         canManageProfiles: false,
         collection: [],

@@ -7,7 +7,7 @@ import type { Customer } from '../../types/account';
 import { getNamedModule } from '../modules/container';
 import { INTEGRATION_TYPE } from '../modules/types';
 import { MAX_WATCHLIST_ITEMS_COUNT } from '../constants';
-import { getLogger } from '../log';
+import { logError } from '../Logger';
 
 import ApiService from './ApiService';
 import StorageService from './StorageService';
@@ -107,7 +107,7 @@ export default class WatchHistoryService {
         })
         .filter((item): item is WatchHistoryItem => Boolean(item));
     } catch (error: unknown) {
-      getLogger().error('WatchHistoryService', 'Failed to get watch history items', error);
+      logError('WatchHistoryService', 'Failed to get watch history items', { error });
     }
 
     return [];

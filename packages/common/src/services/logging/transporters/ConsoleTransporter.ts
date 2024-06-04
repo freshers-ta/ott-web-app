@@ -11,14 +11,18 @@ export default class ConsoleTransporter implements LogTransporter {
     switch (level) {
       case LogLevel.ERROR:
       case LogLevel.FATAL:
-        console.error(`[${scope}] ${message}`, error);
+        console.error(`${LogLevel[level]} [${scope}] ${message}`);
         break;
       case LogLevel.WARN:
-        console.warn(`[${scope}] ${message}`);
+        console.warn(`${LogLevel[level]} [${scope}] ${message}`);
         break;
       default:
         // eslint-disable-next-line no-console
-        console.log(`[${scope}] ${message}`);
+        console.log(`${LogLevel[level]} [${scope}] ${message}`);
+    }
+
+    if (error) {
+      console.error(error);
     }
 
     if (extra) {

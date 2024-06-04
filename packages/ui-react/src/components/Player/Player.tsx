@@ -4,7 +4,7 @@ import type { PlaylistItem } from '@jwp/ott-common/types/playlist';
 import { useConfigStore } from '@jwp/ott-common/src/stores/ConfigStore';
 import { deepCopy } from '@jwp/ott-common/src/utils/collection';
 import { testId } from '@jwp/ott-common/src/utils/common';
-import { getLogger } from '@jwp/ott-common/src/log';
+import { logInfo } from '@jwp/ott-common/src/Logger';
 import useEventCallback from '@jwp/ott-hooks-react/src/useEventCallback';
 import useOttAnalytics from '@jwp/ott-hooks-react/src/useOttAnalytics';
 import { attachAnalyticsParams } from '@jwp/ott-common/src/utils/analytics';
@@ -156,7 +156,7 @@ const Player: React.FC<Props> = ({
 
       // We already loaded this item
       if (currentItem && currentItem.mediaid === item.mediaid) {
-        getLogger().info('Player', 'Calling loadPlaylist with the same item, check the dependencies');
+        logInfo('Player', 'Calling loadPlaylist with the same item, check the dependencies');
         return;
       }
 

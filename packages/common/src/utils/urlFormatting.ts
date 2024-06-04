@@ -1,6 +1,6 @@
 import type { PlaylistItem } from '../../types/playlist';
-import { RELATIVE_PATH_USER_MY_PROFILE, PATH_MEDIA, PATH_PLAYLIST, PATH_USER_MY_PROFILE } from '../paths';
-import { getLogger } from '../log';
+import { PATH_MEDIA, PATH_PLAYLIST, PATH_USER_MY_PROFILE, RELATIVE_PATH_USER_MY_PROFILE } from '../paths';
+import { logWarn } from '../Logger';
 
 import { getLegacySeriesPlaylistIdFromEpisodeTags, getSeriesPlaylistIdFromCustomParams } from './media';
 
@@ -66,7 +66,14 @@ export const createPath = <Path extends string>(originalPath: Path, pathParams?:
       const paramValue = pathParams[paramName as keyof typeof pathParams];
 
       if (!paramValue) {
-        if (!isOptional) getLogger().warn('urlFormatting', `Missing param in path creation`, { path: originalPath, paramName });
+        if (!isOptional) {
+          logWarn('urlFormatting', `Missing param in path creation`, {
+            extra: {
+              path: originalPath,
+              paramName,
+            },
+          });
+        }
 
         return '';
       }
@@ -101,7 +108,15 @@ export const mediaURL = ({
   play?: boolean;
   episodeId?: string;
 }) => {
-  return createPath(PATH_MEDIA, { id: media.mediaid, title: slugify(media.title) }, { r: playlistId, play: play ? '1' : null, e: episodeId });
+  return createPath(
+    PATH_MEDIA,
+    { id: media.mediaid, title: slugify(media.title) },
+    {
+      r: playlistId,
+      play: play ? '1' : null,
+      e: episodeId,
+    },
+  );
 };
 
 export const playlistURL = (id: string, title?: string) => {
