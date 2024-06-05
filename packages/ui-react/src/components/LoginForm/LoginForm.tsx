@@ -44,8 +44,6 @@ const LoginForm: React.FC<Props> = ({ onSubmit, onChange, values, errors, valida
           {errors.form}
         </FormFeedback>
       ) : null}
-      {/* Social login feature is currently not in use, so the SocialButtonsList component is commented out for now. */}
-      {/* <SocialButtonsList socialLoginURLs={socialLoginURLs} /> */}
       <h2 className={styles.title}>{t('login.sign_in')}</h2>
       <TextField
         value={values.email}
