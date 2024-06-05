@@ -5,7 +5,7 @@ import { injectable } from 'inversify';
 import EpgService from '../EpgService';
 import type { PlaylistItem } from '../../../types/playlist';
 import type { EpgProgram } from '../../../types/epg';
-import { logError, logWarn } from '../../Logger';
+import { logError, logWarn } from '../../logger';
 
 const viewNexaEpgProgramSchema = object().shape({
   'episode-num': object().shape({

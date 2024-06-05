@@ -5,7 +5,7 @@ import defaultAvatar from '@jwp/ott-theme/assets/profiles/default_avatar.png';
 import ProfileService from '../ProfileService';
 import StorageService from '../../StorageService';
 import type { CreateProfile, DeleteProfile, EnterProfile, GetProfileDetails, ListProfiles, UpdateProfile } from '../../../../types/profiles';
-import { logError } from '../../../Logger';
+import { logError } from '../../../logger';
 
 @injectable()
 export default class JWPProfileService extends ProfileService {

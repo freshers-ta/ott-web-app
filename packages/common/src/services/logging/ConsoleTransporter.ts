@@ -1,11 +1,12 @@
-import { LogLevel } from '../LogLevel';
+import { LogLevel } from './LogLevel';
+import LogTransporter from './LogTransporter';
 
-import type LogTransporter from './LogTransporter';
+export default class ConsoleTransporter extends LogTransporter {
+  constructor(logLevel: LogLevel) {
+    super(logLevel);
+  }
 
-export default class ConsoleTransporter implements LogTransporter {
-  constructor(readonly logLevel: LogLevel) {}
-
-  log(level: LogLevel, scope: string, message: string, extra?: Record<string, unknown>, error?: Error) {
+  override log(level: LogLevel, scope: string, message: string, extra?: Record<string, unknown>, error?: Error) {
     if (level < this.logLevel) return;
 
     switch (level) {
@@ -27,7 +28,7 @@ export default class ConsoleTransporter implements LogTransporter {
 
     if (extra) {
       // eslint-disable-next-line no-console
-      console.table(extra);
+      console.log(extra);
     }
   }
 }

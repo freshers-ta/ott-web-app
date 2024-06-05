@@ -15,6 +15,10 @@ export function getModule<T>(constructorFunction: interfaces.ServiceIdentifier<T
   return module;
 }
 
+export function getAllModules<T>(constructorFunction: interfaces.ServiceIdentifier<T>): T[] {
+  return container.getAll(constructorFunction);
+}
+
 export function getNamedModule<T>(constructorFunction: interfaces.ServiceIdentifier<T>, name: string | null, required: false): T | undefined;
 export function getNamedModule<T>(constructorFunction: interfaces.ServiceIdentifier<T>, name: string | null, required: true): T;
 export function getNamedModule<T>(constructorFunction: interfaces.ServiceIdentifier<T>, name: string | null): T;

@@ -44,9 +44,16 @@ vi.mock('@jwp/ott-common/src/modules/container', async () => {
     return mockedService.implementation;
   };
 
+  const getAllModules = (serviceIdentifier: interfaces.ServiceIdentifier) => {
+    const mockedService = mockedServices.find((current) => current.serviceIdentifier === serviceIdentifier);
+
+    return mockedService ? [mockedService.implementation] : [];
+  };
+
   return {
     ...actual,
     getModule,
+    getAllModules,
     getNamedModule: (serviceIdentifier: interfaces.ServiceIdentifier, _name: string) => {
       return getModule(serviceIdentifier);
     },

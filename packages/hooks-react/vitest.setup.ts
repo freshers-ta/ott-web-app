@@ -1,14 +1,10 @@
 import 'vi-fetch/setup';
 import 'reflect-metadata';
 import { mockService } from '@jwp/ott-common/test/mockService';
-import LogService from '@jwp/ott-common/src/services/logging/LogService';
+import LogTransporter from 'packages/common/src/services/logging/LogTransporter';
 
 beforeEach(() => {
-  mockService(LogService, {
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    fatal: () => {},
+  mockService(LogTransporter, {
+    log() {},
   });
 });

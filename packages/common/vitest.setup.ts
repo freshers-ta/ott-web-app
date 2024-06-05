@@ -1,15 +1,11 @@
 import 'vi-fetch/setup';
 import 'reflect-metadata';
 import { mockService } from './test/mockService';
-import LogService from './src/services/logging/LogService';
+import LogTransporter from './src/services/logging/LogTransporter';
 
 beforeEach(() => {
-  mockService(LogService, {
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    fatal: () => {},
+  mockService(LogTransporter, {
+    log() {},
   });
 });
 

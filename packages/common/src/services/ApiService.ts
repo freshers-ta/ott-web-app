@@ -10,7 +10,7 @@ import type { GetPlaylistParams, Playlist, PlaylistItem } from '../../types/play
 import type { AdSchedule } from '../../types/ad-schedule';
 import type { EpisodeInSeries, EpisodesRes, EpisodesWithPagination, GetSeriesParams, Series } from '../../types/series';
 import env from '../env';
-import { logError } from '../Logger';
+import { logError } from '../logger';
 
 // change the values below to change the property used to look up the alternate image
 enum ImageProperty {

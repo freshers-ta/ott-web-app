@@ -6,7 +6,7 @@ import EpgService from '../EpgService';
 import type { PlaylistItem } from '../../../types/playlist';
 import type { EpgProgram } from '../../../types/epg';
 import { getDataOrThrow } from '../../utils/api';
-import { logError, logWarn } from '../../Logger';
+import { logError, logWarn } from '../../logger';
 
 const AUTHENTICATION_HEADER = 'API-KEY';
 

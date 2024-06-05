@@ -4,7 +4,7 @@ import QueryProvider from '@jwp/ott-ui-react/src/containers/QueryProvider/QueryP
 import { ErrorPageWithoutTranslation } from '@jwp/ott-ui-react/src/components/ErrorPage/ErrorPage';
 import LoadingOverlay from '@jwp/ott-ui-react/src/components/LoadingOverlay/LoadingOverlay';
 import { AriaAnnouncerProvider } from '@jwp/ott-ui-react/src/containers/AnnouncementProvider/AnnoucementProvider';
-import { logError } from '@jwp/ott-common/src/Logger';
+import { logError } from '@jwp/ott-common/src/logger';
 
 import initI18n from './i18n/config';
 import Root from './containers/Root/Root';

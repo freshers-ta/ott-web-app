@@ -1,6 +1,6 @@
 import { injectable } from '@jwp/ott-common/src/modules/container';
 import StorageService from '@jwp/ott-common/src/services/StorageService';
-import { logError } from '@jwp/ott-common/src/Logger';
+import { logError } from '@jwp/ott-common/src/logger';
 
 @injectable()
 export class LocalStorageService extends StorageService {

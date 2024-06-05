@@ -9,7 +9,7 @@ import type { AuthData } from '../../../../types/account';
 import StorageService from '../../StorageService';
 import { GET_CUSTOMER_IP } from '../../../modules/types';
 import type { GetCustomerIP } from '../../../../types/get-customer-ip';
-import { logDebug, logError } from '../../../Logger';
+import { logDebug, logError } from '../../../logger';
 
 import type { GetLocalesResponse } from './types/account';
 import type { Response } from './types/api';

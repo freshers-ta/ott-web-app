@@ -1,6 +1,6 @@
 import type { PlaylistItem } from '../../types/playlist';
 import { PATH_MEDIA, PATH_PLAYLIST, PATH_USER_MY_PROFILE, RELATIVE_PATH_USER_MY_PROFILE } from '../paths';
-import { logWarn } from '../Logger';
+import { logWarn } from '../logger';
 
 import { getLegacySeriesPlaylistIdFromEpisodeTags, getSeriesPlaylistIdFromCustomParams } from './media';
 

@@ -8,17 +8,13 @@ import { fireEvent } from '@testing-library/react';
 import * as matchers from 'vitest-axe/matchers';
 import { expect } from 'vitest';
 import { mockService } from '@jwp/ott-common/test/mockService';
-import LogService from '@jwp/ott-common/src/services/logging/LogService';
+import LogTransporter from '@jwp/ott-common/src/services/logging/LogTransporter';
 
 expect.extend(matchers);
 
 beforeEach(() => {
-  mockService(LogService, {
-    debug: () => {},
-    info: () => {},
-    warn: () => {},
-    error: () => {},
-    fatal: () => {},
+  mockService(LogTransporter, {
+    log() {},
   });
 });
 

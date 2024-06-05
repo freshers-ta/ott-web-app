@@ -9,7 +9,7 @@ import { useAccountStore } from '@jwp/ott-common/src/stores/AccountStore';
 import AccountController from '@jwp/ott-common/src/controllers/AccountController';
 import { modalURLFromLocation } from '@jwp/ott-ui-react/src/utils/location';
 import useForm, { type UseFormOnSubmitHandler } from '@jwp/ott-hooks-react/src/useForm';
-import { logDebug, logError } from '@jwp/ott-common/src/Logger';
+import { logDebug, logError } from '@jwp/ott-common/src/logger';
 
 import ResetPasswordForm from '../../../components/ResetPasswordForm/ResetPasswordForm';
 import ForgotPasswordForm from '../../../components/ForgotPasswordForm/ForgotPasswordForm';

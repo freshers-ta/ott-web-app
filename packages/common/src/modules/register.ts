@@ -12,7 +12,6 @@ import JWPEntitlementService from '../services/JWPEntitlementService';
 import FavoriteService from '../services/FavoriteService';
 import ConfigService from '../services/ConfigService';
 import SettingsService from '../services/SettingsService';
-import LogService from '../services/logging/LogService';
 
 import WatchHistoryController from '../controllers/WatchHistoryController';
 import CheckoutController from '../controllers/CheckoutController';
@@ -54,7 +53,6 @@ container.bind(FavoriteService).toSelf();
 container.bind(GenericEntitlementService).toSelf();
 container.bind(ApiService).toSelf();
 container.bind(SettingsService).toSelf();
-container.bind(LogService).toSelf();
 
 // Common controllers
 container.bind(AppController).toSelf();

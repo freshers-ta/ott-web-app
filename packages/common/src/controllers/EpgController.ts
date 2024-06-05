@@ -6,7 +6,7 @@ import { EPG_TYPE } from '../constants';
 import { getNamedModule } from '../modules/container';
 import type { PlaylistItem } from '../../types/playlist';
 import type { EpgChannel, EpgProgram } from '../../types/epg';
-import { logDebug, logError, logWarn } from '../Logger';
+import { logDebug, logError, logWarn } from '../logger';
 
 export const isFulfilled = <T>(input: PromiseSettledResult<T>): input is PromiseFulfilledResult<T> => {
   if (input.status === 'fulfilled') {

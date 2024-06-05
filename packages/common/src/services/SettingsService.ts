@@ -6,7 +6,7 @@ import { CONFIG_FILE_STORAGE_KEY, CONFIG_QUERY_KEY, OTT_GLOBAL_PLAYER_ID } from 
 import { AppError } from '../utils/error';
 import type { Settings } from '../../types/settings';
 import env from '../env';
-import { logDebug, logWarn } from '../Logger';
+import { logDebug, logWarn } from '../logger';
 
 import StorageService from './StorageService';
 
