@@ -99,6 +99,7 @@ export default ({ mode, command }: ConfigEnv): UserConfigExport => {
       'import.meta.env.APP_VERSION': JSON.stringify(process.env.npm_package_version),
       __mode__: JSON.stringify(mode),
       __dev__: process.env.NODE_ENV !== 'production',
+      __debug__: process.env.APP_TEST_DEBUG === '1',
       'import.meta.env.APP_BODY_FONT': JSON.stringify(bodyFontsString),
       'import.meta.env.APP_BODY_ALT_FONT': JSON.stringify(bodyAltFontsString),
     },

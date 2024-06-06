@@ -9,13 +9,20 @@ import * as matchers from 'vitest-axe/matchers';
 import { expect } from 'vitest';
 import { mockService } from '@jwp/ott-common/test/mockService';
 import LogTransporter from '@jwp/ott-common/src/services/logging/LogTransporter';
+import ConsoleTransporter from '@jwp/ott-common/src/services/logging/ConsoleTransporter';
+import { LogLevel } from '@jwp/ott-common/src/services/logging/LogLevel';
 
 expect.extend(matchers);
 
 beforeEach(() => {
-  mockService(LogTransporter, {
-    log() {},
-  });
+  mockService(
+    LogTransporter,
+    __debug__
+      ? new ConsoleTransporter(LogLevel.DEBUG)
+      : {
+          log() {},
+        },
+  );
 });
 
 beforeAll(() => {
