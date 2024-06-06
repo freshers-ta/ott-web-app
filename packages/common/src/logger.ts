@@ -13,6 +13,7 @@ export const makeLogFn =
   (scope: string, message: string, { extra, error }: LogParams = {}) => {
     const transporters = getAllModules(LogTransporter);
 
+    // call log on all transporters, the transporters should decide to handle the call or not
     transporters.forEach((transporter) => {
       transporter.log(logLevel, scope, message, extra, error ? wrapError(error) : undefined);
     });

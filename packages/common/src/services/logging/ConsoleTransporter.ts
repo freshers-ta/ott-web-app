@@ -2,8 +2,8 @@ import { LogLevel } from './LogLevel';
 import LogTransporter from './LogTransporter';
 
 export default class ConsoleTransporter extends LogTransporter {
-  constructor(logLevel: LogLevel) {
-    super(logLevel);
+  constructor(private readonly logLevel: LogLevel) {
+    super();
   }
 
   override log(level: LogLevel, scope: string, message: string, extra?: Record<string, unknown>, error?: Error) {
