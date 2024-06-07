@@ -58,13 +58,9 @@ type Props = {
   setSelectedOfferId: (offerId: string | null) => void;
   isUpgradeOffer: boolean | undefined;
   setIsUpgradeOffer: (isUpgradeOffer: boolean | undefined) => void;
-};
-
-const EXTERNAL_PAYMENT_METHODS = ['Apple In-App', 'Android In-App', 'Roku In-App'];
-const STORE_LINKS: Record<string, string> = {
-  apple: 'https://support.apple.com/en-qa/118428',
-  android: 'https://support.google.com/googleplay/answer/7018481?hl=en',
-  roku: 'https://support.roku.com/article/208756478',
+  isExternalPaymentProvider: boolean;
+  paymentProvider?: string;
+  paymentProviderLink?: string;
 };
 
 const Payment = ({
@@ -93,6 +89,9 @@ const Payment = ({
   setSelectedOfferId,
   isUpgradeOffer,
   setIsUpgradeOffer,
+  isExternalPaymentProvider,
+  paymentProvider,
+  paymentProviderLink,
 }: Props): JSX.Element => {
   const subscriptionDetailsId = useOpaqueId('subscription-details');
   const paymentMethodId = useOpaqueId('payment-method');
@@ -160,9 +159,6 @@ const Payment = ({
     }
   }
 
-  const isExternalPaymentProvider = activeSubscription && EXTERNAL_PAYMENT_METHODS.includes(activeSubscription.paymentMethod);
-  const paymentProvider = activeSubscription?.paymentMethod.split(' ')[0] || 'unknown';
-  const paymentProviderLink = STORE_LINKS[paymentProvider.toLowerCase()];
   const showChangeSubscriptionButton = (!isExternalPaymentProvider && offerSwitchesAvailable) || (!isChangingOffer && !canRenewSubscription);
 
   return (
