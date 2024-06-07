@@ -77,6 +77,10 @@
     "yearly": "Yearly",
     "yearly_subscription": "Yearly subscription"
   },
+  "external_payment": {
+    "explanation": "This subscription is managed via {{paymentProvider}}.",
+    "manage_subscription": "Click here for more information."
+  },
   "login": {
     "email": "Email",
     "facebook": "Sign in with Facebook",

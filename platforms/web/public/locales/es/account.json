@@ -83,6 +83,10 @@
     "yearly": "Anual",
     "yearly_subscription": "Suscripción anual"
   },
+  "external_payment": {
+    "explanation": "Esta suscripción se gestiona a través de {{paymentProvider}}.",
+    "manage_subscription": "Haga clic aquí para más información."
+  },
   "login": {
     "email": "Correo electrónico",
     "facebook": "Inicia sesión con Facebook",
