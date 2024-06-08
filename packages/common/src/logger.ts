@@ -2,7 +2,7 @@ import { getAllModules } from './modules/container';
 import { LogLevel } from './services/logging/LogLevel';
 import LogTransporter from './services/logging/LogTransporter';
 
-export type LogParams = { extra?: Record<string, unknown>; error?: unknown };
+export type LogParams = { error?: unknown; [key: string]: unknown };
 
 const wrapError = (error: unknown) => {
   return error instanceof Error ? error : new Error(String(error));
@@ -10,7 +10,7 @@ const wrapError = (error: unknown) => {
 
 export const makeLogFn =
   (logLevel: LogLevel) =>
-  (scope: string, message: string, { extra, error }: LogParams = {}) => {
+  (scope: string, message: string, { error, ...extra }: LogParams = {}) => {
     const transporters = getAllModules(LogTransporter);
 
     // call log on all transporters, the transporters should decide to handle the call or not

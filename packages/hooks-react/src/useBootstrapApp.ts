@@ -28,7 +28,7 @@ export const useBootstrapApp = (url: string, onReady: OnReadyCallback) => {
       refetchInterval: false,
       retry: 1,
       onSettled: (query) => {
-        logDebug('Bootstrap', 'Initialized application', { extra: { ...query } });
+        logDebug('Bootstrap', 'Initialized application', { ...query });
         onReady(query?.config);
       },
       cacheTime: CACHE_TIME,

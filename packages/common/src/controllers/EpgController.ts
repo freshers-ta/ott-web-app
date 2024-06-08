@@ -58,7 +58,7 @@ export default class EpgController {
           ?.transformProgram(program)
           // This quiets promise resolution errors in the console
           .catch((error) => {
-            logDebug('EpgController', 'Failed to transform a program', { error, extra: { program } });
+            logDebug('EpgController', 'Failed to transform a program', { error, program });
             return undefined;
           }),
       ),

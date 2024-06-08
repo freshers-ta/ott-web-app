@@ -48,7 +48,7 @@ export default class ViewNexaEpgService extends EpgService {
     const scheduleUrl = item.scheduleUrl;
 
     if (!scheduleUrl) {
-      logWarn('ViewNexaEpgService', 'Tried requesting a schedule for an item with missing `scheduleUrl`', { extra: { item } });
+      logWarn('ViewNexaEpgService', 'Tried requesting a schedule for an item with missing `scheduleUrl`', { item });
       return undefined;
     }
 

@@ -46,7 +46,7 @@ export default class JWEpgService extends EpgService {
 
   fetchSchedule = async (item: PlaylistItem) => {
     if (!item.scheduleUrl) {
-      logWarn('JWEpgService', 'Tried requesting a schedule for an item with missing `scheduleUrl`', { extra: { item } });
+      logWarn('JWEpgService', 'Tried requesting a schedule for an item with missing `scheduleUrl`', { item });
       return undefined;
     }
 

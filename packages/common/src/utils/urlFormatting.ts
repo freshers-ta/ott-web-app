@@ -68,10 +68,8 @@ export const createPath = <Path extends string>(originalPath: Path, pathParams?:
       if (!paramValue) {
         if (!isOptional) {
           logWarn('urlFormatting', `Missing param in path creation`, {
-            extra: {
-              path: originalPath,
-              paramName,
-            },
+            path: originalPath,
+            paramName,
           });
         }
 

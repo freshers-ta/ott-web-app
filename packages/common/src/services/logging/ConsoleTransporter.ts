@@ -26,7 +26,7 @@ export default class ConsoleTransporter extends LogTransporter {
       console.error(error);
     }
 
-    if (extra) {
+    if (extra && Object.keys(extra).length > 0) {
       // eslint-disable-next-line no-console
       console.log(extra);
     }

@@ -64,7 +64,7 @@ export default class AppController {
   };
 
   initializeApp = async (url: string, refreshEntitlements?: () => Promise<void>) => {
-    logDebug('AppController', 'Initializing app', { extra: { url } });
+    logDebug('AppController', 'Initializing app', { url });
 
     const settings = await this.settingsService.initialize();
     const configSource = await this.settingsService.getConfigSource(settings, url);
